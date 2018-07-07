@@ -20,9 +20,9 @@ restrictCoord (x,y) (xMin, yMin) (xMax, yMax) = (res x xMin xMax, res y yMin yMa
 inputToDir :: Input -> Maybe Coord
 inputToDir i =
   case i of
-    'w'-> Just (0,-1)
-    's'-> Just (0,1)
-    'a'-> Just (-1,0)
-    'd'-> Just (1,0)
+    W -> Just (0,-1)
+    S -> Just (0,1)
+    A -> Just (-1,0)
+    D -> Just (1,0)
     _ -> Nothing
 

@@ -31,7 +31,7 @@ oneSecond :: Int
 oneSecond = (10::Int) ^ (6::Int)
 
 inputInterval :: Int
-inputInterval = div oneSecond 4
+inputInterval = div oneSecond 10
 
 drawGame :: World -> IO()
 drawGame world = do
@@ -43,23 +43,36 @@ gameLoop :: World -> IO ()
 gameLoop world = do
   drawGame world
   input <- sample inputInterval getInput
-  if (currentScene world == Main && input == Just 'q')
+  if (currentScene world == Main && input == Just Q)
     then handleExit
     else handleInput world input
 
 handleInput :: World -> Maybe Input -> IO()
 handleInput w Nothing = gameLoop w
-handleInput w (Just i) =
-  case i of
-    'h' -> gameLoop $ w{ currentScene = HeroInfo}
-    'g' -> gameLoop $ w{currentScene = Dungeons}
-    _ -> gameLoop $ w {wHero = nw}
-      where
-        hPos = wHero w
-        nw = restrictCoord nw_unrestricted minCoord maxCoord
-        dir = getDirWithDefault $ inputToDir i
-        nw_unrestricted = dir |+| hPos
-        getDirWithDefault d = case d of (Just dr) -> dr; Nothing -> (0,0)
+handleInput w@(World {currentScene=scene}) (Just i)
+  | not $ isInputUseful w i = gameLoop w
+  | otherwise =
+    case scene of
+      Main -> handleMainScene w i
+      Dungeons -> handleDungeonScene w i
+      HeroInfo -> handleHeroInfoScene w i
+      Fight -> gameLoop w
+
+handleMainScene :: World -> Input -> IO()
+handleMainScene world inp = gameLoop nw
+  where nw = case inp of
+          D -> world{currentScene = Dungeons}
+          H -> world{currentScene = HeroInfo}
+
+handleDungeonScene :: World -> Input -> IO()
+handleDungeonScene world inp = gameLoop nw
+  where nw = case inp of
+          M -> world{currentScene = Main}
+
+handleHeroInfoScene :: World -> Input -> IO()
+handleHeroInfoScene world inp = gameLoop nw
+  where nw = case inp of
+          M -> world{currentScene = Main}
 
 game :: IO ()
 game = do

@@ -56,12 +56,19 @@ instance Show Dungeon where
 instance Show World where
   show World {currentScene = scene, heros = allHero, dungeons = allDungeon} =
     case scene of
-      HeroInfo -> show allHero
-      Main -> "press h to goto all heros \n" ++ "Number of heros: " ++ (show $ length allHero)
+      HeroInfo -> concat $ map show allHero
+      Main -> "press h to goto all heros \n" ++ "Number of heros: " ++ (show $ length allHero) ++ "\n"
               ++ "press g to all dungones \n"
-      Dungeons -> show allDungeon
+      Dungeons -> concat $ map show allDungeon
       _ -> "World"
 
-
 sceneAvailableInput :: Map.Map Scene [Input]
-sceneAvailableInput = Map.fromList [(Main, ['g'])]
+sceneAvailableInput = Map.fromList [(Main, [D, H, Q]), (Dungeons, [M]), (HeroInfo, [M])]
+
+isInputUseful :: World -> Input -> Bool
+isInputUseful (World {currentScene = scene}) i =
+  case availableList of
+      Just l -> i `elem` l
+      Nothing -> False
+  where
+    availableList = Map.lookup scene sceneAvailableInput
