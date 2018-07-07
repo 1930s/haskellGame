@@ -1,21 +1,11 @@
 module Input where
 
-data Input = North
-           | South
-           | West
-           | East
-           | Enter
-           | Exit
-           deriving (Eq, Show)
+type Input = Char
 
 getInput :: IO (Input)
 getInput = do
   key <- getChar
-  case key of
-    'w' -> return North
-    's' -> return South
-    'a' -> return West
-    'd' -> return East
-    'q' -> return Exit
-    _ -> getInput
+  if (key >= 'a' && key <= 'z') || (key >= '0' && key <= '9')
+    then return key
+    else getInput
 
