@@ -9,7 +9,7 @@ import Control.Concurrent
 import Control.Concurrent.Async
 import Coord
 import Input
-import World
+import Core.World
 
 gameInit :: IO ()
 gameInit = do
@@ -79,9 +79,22 @@ game = do
   gameInit
   gameLoop $ World {
     currentScene = Main,
-    heros = [Hero "h1" 1 1],
-    dungeons = [Dungeon "d1" [Enemy "e1" 1 2 3 4]],
-    wHero = (0,0)}
+    heros = [Hero {
+                name = "hero1",
+                hp = 10,
+                atk = 2,
+                level = 1,
+                curExp = 0,
+                expCap = 10,
+                  }],
+    dungeons = [Dungeon "d1" [Enemy {
+                                 name = "enemy1",
+                                 hp = 5,
+                                 atk = 1,
+                                 expReward = 5,
+                                 moneyReward = 10
+                                    }]],
+    }
 
 handleExit :: IO ()
 handleExit = do

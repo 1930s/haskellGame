@@ -6,6 +6,9 @@ import Coord
 import Data.List
 import qualified Data.Map.Strict as Map
 import Input
+import Hero
+import Enemy
+import Dungeon
 
 data Scene = Main
            | HeroInfo
@@ -13,45 +16,12 @@ data Scene = Main
            | Fight
            deriving (Eq, Show, Ord)
 
-data Hero = Hero {
-  name :: String,
-  hp :: Int,
-  atk :: Int
-  }
-
-data Enemy = Enemy {
-  name :: String,
-  hp :: Int,
-  atk :: Int,
-  expReward :: Int,
-  moneyReward :: Int
-  } deriving (Show)
-
-data Dungeon = Dungeon {
-  name :: String,
-  enemies :: [Enemy]
-  }
-
 data World = World {
   wHero :: Coord ,
   currentScene :: Scene ,
   heros :: [Hero],
   dungeons :: [Dungeon]
   }
-
-instance Show Hero where
-  show (Hero {name = n, hp = h, atk = a}) = intercalate "\n" toDisplay
-    where show_name = "Name: " ++ show n
-          show_hp = "HP: " ++ show h
-          show_atk = "ATK: " ++ show a
-          toDisplay = ["Hero:", show_name, show_hp, show_atk, "--"]
-
-instance Show Dungeon where
-  show dungeon = intercalate "\n" toDisplay
-    where
-      show_name = show (name (dungeon :: Dungeon))
-      show_num = "number of enemies: " ++ (show $length (enemies dungeon))
-      toDisplay = ["Dungeon: ", show_name, show_num, "--"]
 
 instance Show World where
   show World {currentScene = scene, heros = allHero, dungeons = allDungeon} =
@@ -63,7 +33,10 @@ instance Show World where
       _ -> "World"
 
 sceneAvailableInput :: Map.Map Scene [Input]
-sceneAvailableInput = Map.fromList [(Main, [D, H, Q]), (Dungeons, [M]), (HeroInfo, [M])]
+sceneAvailableInput = Map.fromList [
+  (Main, [D, H, Q]),
+  (Dungeons, [M]),
+  (HeroInfo, [M])]
 
 isInputUseful :: World -> Input -> Bool
 isInputUseful (World {currentScene = scene}) i =
