@@ -2,6 +2,7 @@
 
 module Core.World where
 
+import System.Random
 import Data.List
 import qualified Data.Map.Strict as Map
 import Input
@@ -18,7 +19,8 @@ data Scene = Main
 data World = World {
   currentScene :: Scene ,
   heros :: [Hero],
-  dungeons :: [Dungeon]
+  dungeons :: [Dungeon],
+  randomGen :: StdGen
   }
 
 instance Show World where
@@ -26,7 +28,7 @@ instance Show World where
     case scene of
       HeroInfo -> concat $ map show allHero
       Main -> "press h to goto all heros \n" ++ "Number of heros: " ++ (show $ length allHero) ++ "\n"
-              ++ "press g to all dungones \n"
+              ++ "press d to all dungones \n"
       Dungeons -> concat $ map show allDungeon
       _ -> "World"
 

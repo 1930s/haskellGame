@@ -6,6 +6,7 @@ module Lib
 
 import System.Console.ANSI
 import System.IO
+import System.Random
 import System.Timeout
 import Control.Concurrent
 import Control.Concurrent.Async
@@ -84,6 +85,7 @@ handleHeroInfoScene world inp = gameLoop nw
 game :: IO ()
 game = do
   gameInit
+  rGen <- getStdGen
   gameLoop $ World {
     currentScene = Main,
     heros = [Hero {
@@ -105,7 +107,8 @@ game = do
                           timeTaken = 10,
                           herosInDungeon = [],
                           countDown = 0
-                        }]
+                        }],
+    randomGen = rGen
     }
 
 handleExit :: IO ()
