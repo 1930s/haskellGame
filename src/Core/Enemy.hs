@@ -1,4 +1,4 @@
-module Enemy where
+module Core.Enemy where
 
 type Name = String
 type HP = Int

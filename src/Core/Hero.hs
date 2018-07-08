@@ -1,4 +1,4 @@
-module Hero where
+module Core.Hero where
 
 import Data.List
 

@@ -1,3 +1,5 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+
 module Lib
     ( game
     ) where
@@ -10,6 +12,9 @@ import Control.Concurrent.Async
 import Coord
 import Input
 import Core.World
+import Core.Hero
+import Core.Enemy
+import Core.Dungeon
 
 gameInit :: IO ()
 gameInit = do
@@ -68,11 +73,13 @@ handleDungeonScene :: World -> Input -> IO()
 handleDungeonScene world inp = gameLoop nw
   where nw = case inp of
           M -> world{currentScene = Main}
+          _ -> world
 
 handleHeroInfoScene :: World -> Input -> IO()
 handleHeroInfoScene world inp = gameLoop nw
   where nw = case inp of
           M -> world{currentScene = Main}
+          _ -> world
 
 game :: IO ()
 game = do
@@ -85,15 +92,20 @@ game = do
                 atk = 2,
                 level = 1,
                 curExp = 0,
-                expCap = 10,
+                expCap = 10
                   }],
-    dungeons = [Dungeon "d1" [Enemy {
+    dungeons = [Dungeon { name = "d1" ,
+                          enemies = [Enemy {
                                  name = "enemy1",
                                  hp = 5,
                                  atk = 1,
                                  expReward = 5,
                                  moneyReward = 10
-                                    }]],
+                                    }],
+                          timeTaken = 10,
+                          herosInDungeon = [],
+                          countDown = 0
+                        }]
     }
 
 handleExit :: IO ()

@@ -1,14 +1,13 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module World where
+module Core.World where
 
-import Coord
 import Data.List
 import qualified Data.Map.Strict as Map
 import Input
-import Hero
-import Enemy
-import Dungeon
+import Core.Hero
+import Core.Enemy
+import Core.Dungeon
 
 data Scene = Main
            | HeroInfo
@@ -17,7 +16,6 @@ data Scene = Main
            deriving (Eq, Show, Ord)
 
 data World = World {
-  wHero :: Coord ,
   currentScene :: Scene ,
   heros :: [Hero],
   dungeons :: [Dungeon]

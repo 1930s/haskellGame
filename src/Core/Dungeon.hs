@@ -1,10 +1,10 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Dungeon where
+module Core.Dungeon where
 
 import Data.List
-import Enemy
-import Hero
+import Core.Enemy
+import Core.Hero
 
 -- for MVP assume only one battle
 -- n v n battle
