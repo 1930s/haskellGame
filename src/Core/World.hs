@@ -9,10 +9,12 @@ import Input
 import Core.Hero
 import Core.Enemy
 import Core.Dungeon
+import Core.DungeonPrepState
 
 data Scene = Main
            | HeroInfo
            | Dungeons
+           | DungeonPrepare
            | Fight
            deriving (Eq, Show, Ord)
 
@@ -20,6 +22,7 @@ data World = World {
   currentScene :: Scene ,
   heros :: [Hero],
   dungeons :: [Dungeon],
+  dungeonPrep :: DungeonPrepState,
   randomGen :: StdGen
   }
 
@@ -36,6 +39,7 @@ sceneAvailableInput :: Map.Map Scene [Input]
 sceneAvailableInput = Map.fromList [
   (Main, [D, H, Q]),
   (Dungeons, [M]),
+  (DungeonPrepare, [D,S]++ (fmap Input [1..9])),
   (HeroInfo, [M])]
 
 isInputUseful :: World -> Input -> Bool

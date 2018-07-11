@@ -8,7 +8,7 @@ import Core.Enemy
 import Core.Hero
 
 -- for MVP assume only one battle
--- n v n battle
+-- n vs n battle
 data Dungeon = Dungeon {
   name :: String,
   enemies :: [Enemy],
@@ -24,11 +24,13 @@ data BattleResult = BattleResult {
   randomGen :: StdGen
   }
 
-updateDungeon :: Int -> Dungeon -> (Dungeon, Maybe BattleResult)
-updateDungeon interval d@Dungeon{countDown = cd}
+processInBallteDungeon :: Int -> Dungeon -> (Dungeon, Maybe BattleResult)
+processInBallteDungeon interval d@Dungeon{countDown = cd}
   | cd > 0 = (d {countDown = max 0 $ cd - interval}, Nothing)
-  | otherwise = (d {countDown = 0}, Just result)
+  | otherwise = (d {countDown = 0, enemies = resetedEnemies, herosInDungeon=[]}, Just result)
   where result = calcBattle d
+        resetedEnemies = map resetEnemy $ enemies d
+        resetEnemy e@Enemy{maxHP = m_hp} = e{hp = m_hp} :: Enemy
 
 calcBattle :: Dungeon -> BattleResult
 calcBattle Dungeon{enemies = es, herosInDungeon = hs, randomGen = rGen} =
