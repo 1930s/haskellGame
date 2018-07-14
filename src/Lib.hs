@@ -16,7 +16,8 @@ import Core.World
 import Core.Hero
 import Core.Enemy
 import Core.Dungeon
-import Core.DungeonPrepState
+import Core.DungeonsPage
+import Core.DungeonPrepPage
 
 gameInit :: IO ()
 gameInit = do
@@ -73,9 +74,11 @@ handleMainScene world inp = gameLoop nw
           H -> world{currentScene = HeroInfo}
 
 handleDungeonScene :: World -> Input -> IO()
-handleDungeonScene world inp = gameLoop nw
+handleDungeonScene world@World{dungeonsPage = d_page} inp = gameLoop nw
   where nw = case inp of
           M -> world{currentScene = Main}
+          J -> world{dungeonsPage = selectDown d_page}
+          K -> world{dungeonsPage = selectUp d_page}
           _ -> world
 
 handleHeroInfoScene :: World -> Input -> IO()
@@ -87,7 +90,13 @@ handleHeroInfoScene world inp = gameLoop nw
 handleDungeonPrepareScene :: World -> Input -> IO()
 handleDungeonPrepareScene world@World{dungeonPrep = d_prep} inp = gameLoop nw
   where
-    newPrep n = d_prep{team = (heros world !! n) : (team d_prep)}
+    allHeros = heros world
+    currentTeam = team d_prep
+    selected n = allHeros !! n
+    selectValid n = n < length allHeros && (not $ (selected n) `elem` currentTeam)
+    newPrep n = if selectValid n
+                then d_prep{team = (heros world !! n) : (team d_prep)}
+                else d_prep
     nw = case inp of
       D -> world{currentScene = Dungeons}
       S -> world{currentScene = Dungeons}
@@ -97,9 +106,10 @@ game :: IO ()
 game = do
   gameInit
   rGen <- getStdGen
+  let (_, gen2) = (random rGen) :: (Integer, StdGen)
   gameLoop $ World {
     currentScene = Main,
-    dungeonPrep = DungeonPrepState [],
+    dungeonPrep = DungeonPrepPage [],
     heros = [Hero {
                 name = "hero1",
                 maxHP = 10,
@@ -108,23 +118,16 @@ game = do
                 level = 1,
                 curExp = 0,
                 expCap = 10
-                  }],
-    dungeons = [Dungeon { name = "d1" ,
-                          enemies = [Enemy {
-                                 name = "enemy1",
-                                 maxHP = 5,
-                                 hp = 5,
-                                 atk = 1,
-                                 expReward = 5,
-                                 moneyReward = 10
-                                    }],
-                          timeTaken = 10,
-                          herosInDungeon = [],
-                          countDown = 0,
-                          randomGen = rGen
-                        }],
+                }],
+    dungeonsPage = DungeonsPage [dungeon1 rGen, dungeon2 gen2] 0,
     randomGen = rGen
     }
+    where e1 = defaultEnemy "enemy1"
+          e2 = defaultEnemy "enemy2"
+          e3 = defaultEnemy "enemy3"
+          e4 = defaultEnemy "enemy4"
+          dungeon1 = defaultDungeon "dungeon1" [e1,e2]
+          dungeon2 = defaultDungeon "dungeon2" [e3,e4]
 
 handleExit :: IO ()
 handleExit = do
@@ -134,7 +137,7 @@ handleExit = do
   showCursor
   putStrLn "exit game"
 
--- THe threadDelay is used so that the screen does not Blink
+-- The threadDelay is used so that the screen does not Blink
 sample :: Int -> IO a -> IO (Maybe a)
 sample l f
   | l < 0 = fmap Just f

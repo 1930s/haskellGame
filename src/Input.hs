@@ -16,6 +16,8 @@ data Input = A
            | S
            | Q
            | M
+           | J
+           | K
            | Input Int
            deriving (Eq, Show, Read)
 

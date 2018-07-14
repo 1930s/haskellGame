@@ -18,7 +18,7 @@ data Hero = Hero {
   level :: Level,
   curExp :: CurExp,
   expCap :: ExpCup
-  }
+  } deriving (Eq)
 
 instance Show Hero where
   show (Hero {name = n, hp = h, atk = a}) = intercalate "\n" toDisplay

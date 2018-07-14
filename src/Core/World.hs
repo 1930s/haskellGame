@@ -9,7 +9,8 @@ import Input
 import Core.Hero
 import Core.Enemy
 import Core.Dungeon
-import Core.DungeonPrepState
+import Core.DungeonsPage
+import Core.DungeonPrepPage
 
 data Scene = Main
            | HeroInfo
@@ -21,25 +22,25 @@ data Scene = Main
 data World = World {
   currentScene :: Scene ,
   heros :: [Hero],
-  dungeons :: [Dungeon],
-  dungeonPrep :: DungeonPrepState,
+  dungeonsPage :: DungeonsPage,
+  dungeonPrep :: DungeonPrepPage,
   randomGen :: StdGen
   }
 
 instance Show World where
-  show World {currentScene = scene, heros = allHero, dungeons = allDungeon} =
+  show World {currentScene = scene, heros = allHero, dungeonsPage = d_page} =
     case scene of
       HeroInfo -> concat $ map show allHero
       Main -> "press h to goto all heros \n" ++ "Number of heros: " ++ (show $ length allHero) ++ "\n"
               ++ "press d to all dungones \n"
-      Dungeons -> concat $ map show allDungeon
+      Dungeons -> show d_page
       _ -> "World"
 
 sceneAvailableInput :: Map.Map Scene [Input]
 sceneAvailableInput = Map.fromList [
   (Main, [D, H, Q]),
-  (Dungeons, [M]),
-  (DungeonPrepare, [D,S]++ (fmap Input [1..9])),
+  (Dungeons, [M, J, K]),
+  (DungeonPrepare, [D,S] ++ (fmap Input [1..9])),
   (HeroInfo, [M])]
 
 isInputUseful :: World -> Input -> Bool

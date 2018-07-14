@@ -15,3 +15,14 @@ data Enemy = Enemy {
   expReward :: ExpReward,
   moneyReward :: MoneyReward
   } deriving (Show)
+
+defaultEnemy :: String -> Enemy
+defaultEnemy n = Enemy {
+            name = n,
+            maxHP = 5,
+            hp = 5,
+            atk = 1,
+            expReward = 5,
+            moneyReward = 10
+            }
+

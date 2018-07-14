@@ -18,6 +18,16 @@ data Dungeon = Dungeon {
   randomGen :: StdGen
   }
 
+defaultDungeon :: String -> [Enemy] -> StdGen  -> Dungeon
+defaultDungeon n es gen = Dungeon {
+  name = n ,
+  enemies = es,
+  timeTaken = 10,
+  herosInDungeon = [],
+  countDown = 0,
+  randomGen = gen
+  }
+
 data BattleResult = BattleResult {
   money :: Int,
   updatedHero :: [Hero],
@@ -68,7 +78,7 @@ exchangeAtk h@Hero{atk = h_atk, hp = h_hp} e@Enemy{atk = e_atk, hp = e_hp} =
         ne = e{hp = max 0 e_hp - h_atk} :: Enemy
 
 instance Show Dungeon where
-  show dungeon = intercalate "\n" toDisplay
+  show dungeon = intercalate "\n" toDisplay ++ "\n"
     where
       show_name = show (name (dungeon :: Dungeon))
       show_num = "number of enemies: " ++ (show $length (enemies dungeon))
