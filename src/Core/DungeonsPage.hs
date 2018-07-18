@@ -7,6 +7,9 @@ data DungeonsPage = DungeonsPage {
   currentSelection :: Int
   }
 
+getSelectedDungeon :: DungeonsPage -> Dungeon
+getSelectedDungeon dp = dungeons dp !! currentSelection dp
+
 selectUp :: DungeonsPage -> DungeonsPage
 selectUp dp@DungeonsPage{currentSelection = cs} = dp {currentSelection = n_cs}
   where n_cs = max 0 (cs-1)

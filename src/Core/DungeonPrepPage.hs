@@ -10,4 +10,4 @@ data DungeonPrepPage = DungeonPrepPage{
 
 instance Show DungeonPrepPage where
   show DungeonPrepPage{team = tm, dungeon = dg} =
-    show dg ++ "\n" ++ show tm
+    show dg ++ "\n" ++ "Heros to enter: " ++ show tm
