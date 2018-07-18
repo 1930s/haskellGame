@@ -39,7 +39,7 @@ instance Show World where
 sceneAvailableInput :: Map.Map Scene [Input]
 sceneAvailableInput = Map.fromList [
   (Main, [D, H, Q]),
-  (Dungeons, [M, J, K]),
+  (Dungeons, [M, J, K, Enter]),
   (DungeonPrepare, [D,S] ++ (fmap Input [1..9])),
   (HeroInfo, [M])]
 

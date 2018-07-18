@@ -14,7 +14,7 @@ data Enemy = Enemy {
   atk :: Atk,
   expReward :: ExpReward,
   moneyReward :: MoneyReward
-  } deriving (Show)
+  } deriving (Show, Eq, Ord)
 
 defaultEnemy :: String -> Enemy
 defaultEnemy n = Enemy {

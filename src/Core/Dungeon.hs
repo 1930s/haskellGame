@@ -14,42 +14,39 @@ data Dungeon = Dungeon {
   enemies :: [Enemy],
   timeTaken :: Int,
   herosInDungeon :: [Hero],
-  countDown :: Int,
-  randomGen :: StdGen
+  countDown :: Int
   }
 
-defaultDungeon :: String -> [Enemy] -> StdGen  -> Dungeon
-defaultDungeon n es gen = Dungeon {
+defaultDungeon :: String -> [Enemy] -> Dungeon
+defaultDungeon n es = Dungeon {
   name = n ,
   enemies = es,
   timeTaken = 10,
   herosInDungeon = [],
-  countDown = 0,
-  randomGen = gen
+  countDown = 0
   }
 
 data BattleResult = BattleResult {
   money :: Int,
-  updatedHero :: [Hero],
-  randomGen :: StdGen
+  updatedHero :: [Hero]
   }
 
-processInBallteDungeon :: Int -> Dungeon -> (Dungeon, Maybe BattleResult)
-processInBallteDungeon interval d@Dungeon{countDown = cd}
+processInBallteDungeon :: Int -> StdGen -> Dungeon -> (Dungeon, Maybe BattleResult)
+processInBallteDungeon interval rGen d@Dungeon{countDown = cd}
   | cd > 0 = (d {countDown = max 0 $ cd - interval}, Nothing)
   | otherwise = (d {countDown = 0, enemies = resetedEnemies, herosInDungeon=[]}, Just result)
-  where result = calcBattle d
+  where result = calcBattle d rGen
         resetedEnemies = map resetEnemy $ enemies d
         resetEnemy e@Enemy{maxHP = m_hp} = e{hp = m_hp} :: Enemy
 
-calcBattle :: Dungeon -> BattleResult
-calcBattle Dungeon{enemies = es, herosInDungeon = hs, randomGen = rGen} =
-  calcBattle_ es BattleResult{money = 0, updatedHero = hs, randomGen = rGen}
+calcBattle :: Dungeon -> StdGen -> BattleResult
+calcBattle Dungeon{enemies = es, herosInDungeon = hs} gen =
+  calcBattle_ es gen BattleResult{money = 0, updatedHero = hs}
 
-calcBattle_ :: [Enemy] -> BattleResult -> BattleResult
-calcBattle_ es bs@BattleResult{money = m, updatedHero = (h:hs), randomGen = rGen}
+calcBattle_ :: [Enemy] -> StdGen -> BattleResult -> BattleResult
+calcBattle_ es rGen bs@BattleResult{money = m, updatedHero = (h:hs)}
   | enemyAllDead || heroAllDead = bs
-  | otherwise = calcBattle_ updatedEs updatedBs
+  | otherwise = calcBattle_ updatedEs newGen updatedBs
     where
       (randomEnemyIndex, newGen) = randomR (0, length es - 1) rGen
       enemyToAtk = es !! randomEnemyIndex
@@ -58,7 +55,7 @@ calcBattle_ es bs@BattleResult{money = m, updatedHero = (h:hs), randomGen = rGen
       updatedHs = hs ++ [newHero]
       enemyAllDead = (sum $ fmap (hp::Enemy -> Int) updatedEs) == 0
       heroAllDead = (sum $ fmap (hp::Hero-> Int) updatedHs) == 0
-      updatedBs = bs{money = m + m_reward, updatedHero = updatedHs, randomGen = newGen}
+      updatedBs = bs{money = m + m_reward, updatedHero = updatedHs}
 
 updateHeroAfterAtk :: (Hero, Enemy) -> (Hero, Enemy, Int)
 updateHeroAfterAtk (h@Hero{expCap = o_cap, curExp = o_exp, level = o_l}, e)
@@ -84,4 +81,3 @@ instance Show Dungeon where
       show_num = "number of enemies: " ++ (show $length (enemies dungeon))
       show_time = "time taken to complete: " ++ (show $ timeTaken dungeon)
       toDisplay = ["Dungeon: ", show_name, show_num, show_time, "--"]
-

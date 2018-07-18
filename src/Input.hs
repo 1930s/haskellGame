@@ -18,41 +18,42 @@ data Input = A
            | M
            | J
            | K
-           | SPC
+           | Enter
            | Input Int
            deriving (Eq, Show)
 
--- simplyfy this?
 instance Read Input where
-  readPrec = parens (
-    do L.Ident s <- lexP
-       case s of
-         "A" -> return A
-         "B" -> return B
-         "C" -> return C
-         "D" -> return D
-         "E" -> return E
-         "F" -> return F
-         "G" -> return G
-         "H" -> return H
-         "W" -> return W
-         "S" -> return S
-         "Q" -> return Q
-         "M" -> return M
-         "J" -> return J
-         "K" -> return K
-         " " -> return SPC
-         "1" -> return $ Input 1
-         "2" -> return $ Input 2
-         "3" -> return $ Input 3
-         "4" -> return $ Input 4
-         "5" -> return $ Input 5
-         "6" -> return $ Input 6
-         "7" -> return $ Input 7
-         "8" -> return $ Input 8
-         "9" -> return $ Input 9
-         _ -> pfail
-    )
+  readsPrec _ val = readF [("A",A)
+                          ,("B",B)
+                          ,("C",C)
+                          ,("D",D)
+                          ,("E",E)
+                          ,("F",F)
+                          ,("G",G)
+                          ,("H",H)
+                          ,("W",W)
+                          ,("S",S)
+                          ,("Q",Q)
+                          ,("M",M)
+                          ,("J",J)
+                          ,("K",K)
+                          ,("\n",Enter)
+                          ,(" ",Enter)
+                          ,("1",Input 1)
+                          ,("2",Input 2)
+                          ,("3",Input 3)
+                          ,("4",Input 4)
+                          ,("5",Input 5)
+                          ,("6",Input 6)
+                          ,("7",Input 7)
+                          ,("8",Input 8)
+                          ,("9",Input 9)
+                          ]
+    where readF [] = []
+          readF ((attempt, result):xs) =
+            if (take (length attempt) val) == attempt
+                         then [(result, drop (length attempt) val)]
+                         else readF xs
 
 getInput :: IO (Input)
 getInput = do
