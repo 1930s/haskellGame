@@ -1,28 +1,38 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Core.Dungeon where
+module Core.Dungeon (Dungeon(..), defaultDungeon, startMission, DungeonState(..)) where
 
 import System.Random
 import Data.List
 import Core.Enemy
 import Core.Hero
 
+
+data DungeonState = NoMission
+                  | InProgress
+                  | MissionComplete deriving(Eq, Show)
+
 -- for MVP assume only one battle
 -- n vs n battle
 data Dungeon = Dungeon {
   name :: String,
   enemies :: [Enemy],
-  timeTaken :: Int,
+  missionLength :: Int,
   herosInDungeon :: [Hero],
+  state :: DungeonState,
   countDown :: Int
-  }
+  } deriving (Eq)
+
+startMission :: Dungeon -> Dungeon
+startMission dg = dg{state = InProgress, countDown = missionLength dg}
 
 defaultDungeon :: String -> [Enemy] -> Dungeon
 defaultDungeon n es = Dungeon {
   name = n ,
   enemies = es,
-  timeTaken = 10,
+  missionLength = 10,
   herosInDungeon = [],
+  state = NoMission,
   countDown = 0
   }
 
@@ -31,8 +41,8 @@ data BattleResult = BattleResult {
   updatedHero :: [Hero]
   }
 
-processInBallteDungeon :: Int -> StdGen -> Dungeon -> (Dungeon, Maybe BattleResult)
-processInBallteDungeon interval rGen d@Dungeon{countDown = cd}
+processInBattleDungeon :: Int -> StdGen -> Dungeon -> (Dungeon, Maybe BattleResult)
+processInBattleDungeon interval rGen d@Dungeon{countDown = cd}
   | cd > 0 = (d {countDown = max 0 $ cd - interval}, Nothing)
   | otherwise = (d {countDown = 0, enemies = resetedEnemies, herosInDungeon=[]}, Just result)
   where result = calcBattle d rGen
@@ -77,7 +87,11 @@ exchangeAtk h@Hero{atk = h_atk, hp = h_hp} e@Enemy{atk = e_atk, hp = e_hp} =
 instance Show Dungeon where
   show dungeon = intercalate "\n" toDisplay ++ "\n"
     where
+      show_state = show $ state dungeon
+      show_progress = case state dungeon of
+                        InProgress -> "Progress: " ++ (take (countDown dungeon) $ repeat '#')
+                        _ -> ""
       show_name = show (name (dungeon :: Dungeon))
       show_num = "number of enemies: " ++ (show $length (enemies dungeon))
-      show_time = "time taken to complete: " ++ (show $ timeTaken dungeon)
-      toDisplay = ["Dungeon: ", show_name, show_num, show_time, "--"]
+      show_time = "time taken to complete: " ++ (show $ missionLength dungeon)
+      toDisplay = ["Dungeon: ", show_name, show_num, show_time, show_state, show_progress, "--"]

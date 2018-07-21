@@ -47,6 +47,8 @@ removeMode d = d{mode = Remove}
 
 instance Show DungeonPrepPage where
   show DungeonPrepPage{team = tm, dungeon = dg, mode = m, benchHeros = bench} =
+    "Press D to return DungeonsPage \n" ++
+    "A for Add hero mode, R for Remove hero mode, S to start mission\n" ++
     "Mode : " ++ show m ++ " Heros\n\n" ++
     show dg ++ "\n" ++
     "Heros to enter: " ++ show tm ++ "\n\n" ++
