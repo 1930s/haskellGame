@@ -30,14 +30,10 @@ handleHeroInfoScene world inp = nw
 handleDungeonPrepareScene :: World -> Input -> World
 handleDungeonPrepareScene world@World{dungeonPrep = d_prep} inp = nw
   where
-    allHeros = heros world
-    currentTeam = team d_prep
-    selected n = allHeros !! n
-    selectValid n = n < length allHeros && (not $ (selected n) `elem` currentTeam)
-    newPrep n = if selectValid n
-                then d_prep{team = (heros world !! n) : (team d_prep)}
-                else d_prep
+    newPrep n = addOrRemoveHero n d_prep
     nw = case inp of
       D -> world{currentScene = Dungeons, dungeonPrep = d_prep{team = []}}
+      A -> world{dungeonPrep = addMode d_prep}
+      R -> world{dungeonPrep = removeMode d_prep}
       (Input n) -> world{dungeonPrep = newPrep (n-1)}
 

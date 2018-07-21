@@ -75,16 +75,8 @@ game = do
   let (_, gen2) = (random rGen) :: (Integer, StdGen)
   gameLoop $ World {
     currentScene = Main,
-    dungeonPrep = DungeonPrepPage [] dungeon1,
-    heros = [Hero {
-                name = "hero1",
-                maxHP = 10,
-                hp = 10,
-                atk = 2,
-                level = 1,
-                curExp = 0,
-                expCap = 10
-                }],
+    dungeonPrep = defaultPrepPage startHeros dungeon1 ,
+    heros = startHeros,
     dungeonsPage = DungeonsPage [dungeon1, dungeon2] 0,
     randomGen = rGen
     }
@@ -94,6 +86,16 @@ game = do
           e4 = defaultEnemy "enemy4"
           dungeon1 = defaultDungeon "dungeon1" [e1,e2]
           dungeon2 = defaultDungeon "dungeon2" [e3,e4]
+          startHeros = [
+            Hero {
+                name = "hero1",
+                maxHP = 10,
+                hp = 10,
+                atk = 2,
+                level = 1,
+                curExp = 0,
+                expCap = 10
+                }]
 
 handleExit :: IO ()
 handleExit = do

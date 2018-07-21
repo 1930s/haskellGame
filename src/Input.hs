@@ -18,6 +18,7 @@ data Input = A
            | M
            | J
            | K
+           | R
            | Enter
            | Input Int
            deriving (Eq, Show)
@@ -37,6 +38,7 @@ instance Read Input where
                           ,("M",M)
                           ,("J",J)
                           ,("K",K)
+                          ,("R",R)
                           ,("\n",Enter)
                           ,(" ",Enter)
                           ,("1",Input 1)

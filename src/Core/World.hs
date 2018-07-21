@@ -41,7 +41,7 @@ sceneAvailableInput :: Map.Map Scene [Input]
 sceneAvailableInput = Map.fromList [
   (Main, [D, H, Q]),
   (Dungeons, [M, J, K, Enter]),
-  (DungeonPrepare, [D] ++ (fmap Input [1..9])),
+  (DungeonPrepare, [D, A, R] ++ (fmap Input [1..9])),
   (HeroInfo, [M])]
 
 isInputUseful :: World -> Input -> Bool
