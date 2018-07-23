@@ -9,6 +9,10 @@ data DungeonsPage = DungeonsPage {
   currentSelection :: Int
   }
 
+dungeonsPageTick :: DungeonsPage -> DungeonsPage
+dungeonsPageTick dp@DungeonsPage{dungeons = ds} = dp{dungeons = n_ds}
+  where n_ds = fmap dungeonTick ds
+
 comeBackFromStartMission :: DungeonPrepPage -> DungeonsPage -> DungeonsPage
 comeBackFromStartMission prepPage dPage = DungeonsPage{dungeons = n_dungeons, currentSelection = 0}
   where dg = dungeon prepPage

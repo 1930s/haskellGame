@@ -4,7 +4,8 @@ import Text.Read
 import Data.Char
 import qualified Text.Read.Lex as L
 
-data Input = A
+data Input = TICK
+           | A
            | B
            | C
            | D

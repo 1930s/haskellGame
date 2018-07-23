@@ -49,7 +49,8 @@ drawGame world = do
   putStr $ show world
 
 gameLoop :: World -> IO ()
-gameLoop world = do
+gameLoop world_ = do
+  let world = gameTick world_
   drawGame world
   input <- sample inputInterval getInput
   if (currentScene world == Main && input == Just Q)

@@ -44,3 +44,6 @@ handleDungeonPrepareScene world@World{dungeonPrep = d_prep, dungeonsPage = d_pag
            else world
       (Input n) -> world{dungeonPrep = newPrep (n-1)}
 
+gameTick :: World -> World
+gameTick w@World{dungeonsPage = dp} = w{dungeonsPage = n_dp}
+  where n_dp = dungeonsPageTick dp

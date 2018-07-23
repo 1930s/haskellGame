@@ -1,12 +1,16 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Core.Dungeon (Dungeon(..), defaultDungeon, startMission, DungeonState(..)) where
+module Core.Dungeon (Dungeon(..)
+                    , defaultDungeon
+                    , startMission
+                    , dungeonTick
+                    , DungeonState(..)) where
 
 import System.Random
 import Data.List
+import Constants
 import Core.Enemy
 import Core.Hero
-
 
 data DungeonState = NoMission
                   | InProgress
@@ -23,6 +27,12 @@ data Dungeon = Dungeon {
   countDown :: Int
   } deriving (Eq)
 
+dungeonTick :: Dungeon -> Dungeon
+dungeonTick dungeon = case state dungeon of
+                        InProgress -> dungeon{countDown = newCountDown}
+                        _ -> dungeon
+                      where newCountDown = max 0 $ countDown dungeon - 1
+
 startMission :: Dungeon -> Dungeon
 startMission dg = dg{state = InProgress, countDown = missionLength dg}
 
@@ -30,7 +40,7 @@ defaultDungeon :: String -> [Enemy] -> Dungeon
 defaultDungeon n es = Dungeon {
   name = n ,
   enemies = es,
-  missionLength = 10,
+  missionLength = 10 * inputRate,
   herosInDungeon = [],
   state = NoMission,
   countDown = 0
@@ -87,9 +97,10 @@ exchangeAtk h@Hero{atk = h_atk, hp = h_hp} e@Enemy{atk = e_atk, hp = e_hp} =
 instance Show Dungeon where
   show dungeon = intercalate "\n" toDisplay ++ "\n"
     where
+      progress = countDown dungeon `div` inputRate
       show_state = show $ state dungeon
       show_progress = case state dungeon of
-                        InProgress -> "Progress: " ++ (take (countDown dungeon) $ repeat '#')
+                        InProgress -> "Progress: " ++ (take progress $ repeat '#')
                         _ -> ""
       show_name = show (name (dungeon :: Dungeon))
       show_num = "number of enemies: " ++ (show $length (enemies dungeon))
