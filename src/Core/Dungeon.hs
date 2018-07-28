@@ -4,6 +4,8 @@ module Core.Dungeon (Dungeon(..)
                     , defaultDungeon
                     , startMission
                     , dungeonTick
+                    , calcBattle
+                    , BattleResult(..)
                     , DungeonState(..)) where
 
 import System.Random
@@ -28,6 +30,7 @@ data Dungeon = Dungeon {
   } deriving (Eq)
 
 dungeonTick :: Dungeon -> Dungeon
+dungeonTick d@Dungeon{countDown = 0, state = InProgress} = d{state = MissionComplete}
 dungeonTick dungeon = case state dungeon of
                         InProgress -> dungeon{countDown = newCountDown}
                         _ -> dungeon
@@ -49,15 +52,7 @@ defaultDungeon n es = Dungeon {
 data BattleResult = BattleResult {
   money :: Int,
   updatedHero :: [Hero]
-  }
-
-processInBattleDungeon :: Int -> StdGen -> Dungeon -> (Dungeon, Maybe BattleResult)
-processInBattleDungeon interval rGen d@Dungeon{countDown = cd}
-  | cd > 0 = (d {countDown = max 0 $ cd - interval}, Nothing)
-  | otherwise = (d {countDown = 0, enemies = resetedEnemies, herosInDungeon=[]}, Just result)
-  where result = calcBattle d rGen
-        resetedEnemies = map resetEnemy $ enemies d
-        resetEnemy e@Enemy{maxHP = m_hp} = e{hp = m_hp} :: Enemy
+  } deriving (Eq, Show, Ord)
 
 calcBattle :: Dungeon -> StdGen -> BattleResult
 calcBattle Dungeon{enemies = es, herosInDungeon = hs} gen =
@@ -101,6 +96,7 @@ instance Show Dungeon where
       show_state = show $ state dungeon
       show_progress = case state dungeon of
                         InProgress -> "Progress: " ++ (take progress $ repeat '#')
+                        MissionComplete -> "Completed!"
                         _ -> ""
       show_name = show (name (dungeon :: Dungeon))
       show_num = "number of enemies: " ++ (show $length (enemies dungeon))

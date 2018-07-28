@@ -2,7 +2,9 @@ module Core.DungeonsPage where
 
 import Core.Dungeon
 import Core.DungeonPrepPage
+import Core.Utils
 import Data.List
+import Data.Maybe
 
 data DungeonsPage = DungeonsPage {
   dungeons :: [Dungeon],
@@ -13,11 +15,17 @@ dungeonsPageTick :: DungeonsPage -> DungeonsPage
 dungeonsPageTick dp@DungeonsPage{dungeons = ds} = dp{dungeons = n_ds}
   where n_ds = fmap dungeonTick ds
 
-comeBackFromStartMission :: DungeonPrepPage -> DungeonsPage -> DungeonsPage
-comeBackFromStartMission prepPage dPage = DungeonsPage{dungeons = n_dungeons, currentSelection = 0}
-  where dg = dungeon prepPage
-        o_dungeons = dungeons dPage
-        n_dungeons = delete dg o_dungeons ++ [startMission dg]
+resetCompletedDungeon :: DungeonsPage -> DungeonsPage
+resetCompletedDungeon dPage = dPage{dungeons = n_ds}
+  where n_ds = fromJust $ modifyAt o_ds (\d -> d{state = NoMission}) idx
+        o_ds = dungeons dPage
+        idx = currentSelection dPage
+
+comeBackFromStartMission :: DungeonsPage -> DungeonsPage
+comeBackFromStartMission dPage = DungeonsPage{dungeons = n_dungeons, currentSelection = 0}
+  where o_dungeons = dungeons dPage
+        n_dungeons = fromJust $ modifyAt o_dungeons startMission idx
+        idx = currentSelection dPage
 
 getSelectedDungeon :: DungeonsPage -> Dungeon
 getSelectedDungeon dp = dungeons dp !! currentSelection dp

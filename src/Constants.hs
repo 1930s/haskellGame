@@ -1,4 +1,4 @@
 module Constants where
 
 inputRate :: Int
-inputRate = 10
+inputRate = 3

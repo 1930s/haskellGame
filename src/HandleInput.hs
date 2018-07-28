@@ -3,7 +3,8 @@ module HandleInput where
 import Core.World
 import Core.DungeonPrepPage
 import Core.DungeonsPage
-import Core.Dungeon(DungeonState(..), Dungeon(..))
+import Core.Dungeon(DungeonState(..), Dungeon(..), BattleResult(..))
+import Core.BattleResultPage
 import Input
 
 handleMainScene :: World -> Input -> World
@@ -19,10 +20,17 @@ handleDungeonScene world@World{dungeonsPage = d_page, dungeonPrep = d_prep} inp 
           J -> world{dungeonsPage = selectDown d_page}
           K -> world{dungeonsPage = selectUp d_page}
           Enter -> case state dg of
-            NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = d_prep{dungeon = dg}}
+            NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
+            MissionComplete -> world{currentScene = FightResultScene,
+                                     dungeonsPage = resetCompletedDungeon d_page,
+                                     battleResultPage = BattleResultPage BattleResult{
+                                        money = 1,
+                                        updatedHero = []}
+                                    }
             _ -> world
           _ -> world
         dg = getSelectedDungeon d_page
+        hs = heros world
 
 handleHeroInfoScene :: World -> Input -> World
 handleHeroInfoScene world inp = nw
@@ -40,9 +48,15 @@ handleDungeonPrepareScene world@World{dungeonPrep = d_prep, dungeonsPage = d_pag
       R -> world{dungeonPrep = removeMode d_prep}
       S -> if ((length $ team d_prep) > 0)
            then world{currentScene = Dungeons
-                     , dungeonsPage = comeBackFromStartMission d_prep d_page}
+                     , dungeonsPage = comeBackFromStartMission d_page}
            else world
       (Input n) -> world{dungeonPrep = newPrep (n-1)}
+
+handleFightResultScene :: World -> Input -> World
+handleFightResultScene world@World{battleResultPage = brp} inp = nw
+  where nw = case inp of
+               M -> world{currentScene = Main}
+               D -> world{currentScene = Dungeons}
 
 gameTick :: World -> World
 gameTick w@World{dungeonsPage = dp} = w{dungeonsPage = n_dp}
