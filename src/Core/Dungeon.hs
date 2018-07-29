@@ -54,7 +54,7 @@ defaultDungeon n es = Dungeon {
 data BattleResult = BattleResult {
   money :: Int,
   updatedHero :: [Hero]
-  } deriving (Eq, Show, Ord)
+  } deriving (Eq, Ord, Show)
 
 calcBattle :: Dungeon -> StdGen -> BattleResult
 calcBattle Dungeon{enemies = es, herosInDungeon = hs} gen =
@@ -71,8 +71,8 @@ calcBattle_ es rGen bs@BattleResult{money = m, updatedHero = hs}
       (randomEnemyIndex, newGen) = randomR (0, length aliveEnemies - 1) rGen
       enemyToAtk = aliveEnemies !! randomEnemyIndex
       (newHero, newEnemy, m_reward) = updateAfterAtk $ exchangeAtk actionHero enemyToAtk
-      updatedEs = fromJust $ replaceAt es newEnemy randomEnemyIndex
-      updatedHs = tail hs ++ [newHero]
+      updatedEs = fromJust $ replaceAt aliveEnemies newEnemy randomEnemyIndex
+      updatedHs = tail aliveHeros ++ [newHero]
       enemyAllDead = length aliveEnemies == 0
       heroAllDead = length aliveHeros == 0
       updatedBs = bs{money = m + m_reward, updatedHero = updatedHs}
@@ -82,9 +82,9 @@ updateAfterAtk (h@Hero{expCap = o_cap, curExp = o_exp, level = o_l}, e)
   | hp (e::Enemy) <= 0 = (h{level = n_l, curExp = n_exp, expCap = n_cap}, e, m_reward)
   | otherwise = (h, e, 0)
     where n_l = if levelUp then o_l+1 else o_l
-          n_exp = if levelUp then o_exp + e_reward else o_exp + e_reward - o_cap
-          n_cap = if levelUp then o_cap * 2 else o_cap
-          levelUp = o_exp + e_reward > o_cap
+          n_exp = o_exp + e_reward
+          n_cap = if levelUp then o_cap * 3 else o_cap
+          levelUp = o_exp + e_reward >= o_cap
           e_reward = expReward e
           m_reward = moneyReward e
 

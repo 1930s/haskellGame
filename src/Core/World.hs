@@ -22,6 +22,7 @@ data Scene = Main
            deriving (Eq, Show, Ord)
 
 data World = World {
+  wealth :: Int,
   currentScene :: Scene ,
   heros :: [Hero],
   dungeonsPage :: DungeonsPage,
@@ -60,6 +61,7 @@ isInputUseful (World {currentScene = scene}) i =
 
 defaultWorld :: StdGen -> World
 defaultWorld rGen = World {
+  wealth = 0,
   currentScene = Main,
   dungeonPrep = defaultPrepPage startHeros dungeon1 ,
   heros = startHeros,

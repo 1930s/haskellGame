@@ -1,6 +1,8 @@
 module HandleInput where
 
+import Data.List
 import Core.World
+import Core.Hero(Hero(..))
 import Core.DungeonPrepPage(addOrRemoveHero,
                             defaultPrepPage,
                             addMode,
@@ -9,6 +11,7 @@ import Core.DungeonPrepPage(addOrRemoveHero,
 import Core.DungeonsPage
 import Core.Dungeon(DungeonState(..),
                     Dungeon(..),
+                    BattleResult(..),
                     calcBattle)
 import Core.BattleResultPage
 import Input
@@ -28,11 +31,17 @@ handleDungeonScene world@World{dungeonsPage = d_page, dungeonPrep = d_prep} inp 
           Enter -> case state dg of
             NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
             MissionComplete -> world{currentScene = FightResultScene,
+                                     wealth = wealth world + money battleResult,
+                                     heros = updatedHs,
                                      dungeonsPage = resetCompletedDungeon d_page,
-                                     battleResultPage = BattleResultPage (calcBattle dg $ randomGen world)}
-            _ -> world
+                                     battleResultPage = BattleResultPage battleResult }
+            InProgress -> world
           _ -> world
         dg = getSelectedDungeon d_page
+        battleResult = calcBattle dg $ randomGen world
+        updatedHs = fmap restoreHealth $ ((heros world) \\ herosComeBack) ++ herosComeBack
+        herosComeBack = updatedHero battleResult
+        restoreHealth h = h{hp = maxHP h}
         hs = heros world
 
 handleHeroInfoScene :: World -> Input -> World
