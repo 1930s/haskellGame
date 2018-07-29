@@ -1,9 +1,15 @@
 module HandleInput where
 
 import Core.World
-import Core.DungeonPrepPage
+import Core.DungeonPrepPage(addOrRemoveHero,
+                            defaultPrepPage,
+                            addMode,
+                            removeMode,
+                            DungeonPrepPage(..))
 import Core.DungeonsPage
-import Core.Dungeon(DungeonState(..), Dungeon(..), BattleResult(..))
+import Core.Dungeon(DungeonState(..),
+                    Dungeon(..),
+                    calcBattle)
 import Core.BattleResultPage
 import Input
 
@@ -23,10 +29,7 @@ handleDungeonScene world@World{dungeonsPage = d_page, dungeonPrep = d_prep} inp 
             NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
             MissionComplete -> world{currentScene = FightResultScene,
                                      dungeonsPage = resetCompletedDungeon d_page,
-                                     battleResultPage = BattleResultPage BattleResult{
-                                        money = 1,
-                                        updatedHero = []}
-                                    }
+                                     battleResultPage = BattleResultPage (calcBattle dg $ randomGen world)}
             _ -> world
           _ -> world
         dg = getSelectedDungeon d_page
@@ -48,7 +51,7 @@ handleDungeonPrepareScene world@World{dungeonPrep = d_prep, dungeonsPage = d_pag
       R -> world{dungeonPrep = removeMode d_prep}
       S -> if ((length $ team d_prep) > 0)
            then world{currentScene = Dungeons
-                     , dungeonsPage = comeBackFromStartMission d_page}
+                     , dungeonsPage = comeBackFromStartMission d_page (team d_prep)}
            else world
       (Input n) -> world{dungeonPrep = newPrep (n-1)}
 

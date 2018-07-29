@@ -1,5 +1,6 @@
 module Core.DungeonsPage where
 
+import Core.Hero
 import Core.Dungeon
 import Core.DungeonPrepPage
 import Core.Utils
@@ -21,10 +22,10 @@ resetCompletedDungeon dPage = dPage{dungeons = n_ds}
         o_ds = dungeons dPage
         idx = currentSelection dPage
 
-comeBackFromStartMission :: DungeonsPage -> DungeonsPage
-comeBackFromStartMission dPage = DungeonsPage{dungeons = n_dungeons, currentSelection = 0}
+comeBackFromStartMission :: DungeonsPage -> [Hero] -> DungeonsPage
+comeBackFromStartMission dPage hs = DungeonsPage{dungeons = n_dungeons, currentSelection = 0}
   where o_dungeons = dungeons dPage
-        n_dungeons = fromJust $ modifyAt o_dungeons startMission idx
+        n_dungeons = fromJust $ modifyAt o_dungeons (startMission hs) idx
         idx = currentSelection dPage
 
 getSelectedDungeon :: DungeonsPage -> Dungeon
