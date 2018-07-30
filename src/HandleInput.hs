@@ -23,7 +23,7 @@ handleMainScene world inp = nw
           H -> world{currentScene = HeroInfo}
 
 handleDungeonScene :: World -> Input -> World
-handleDungeonScene world@World{dungeonsPage = d_page, dungeonPrep = d_prep} inp = nw
+handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
   where nw = case inp of
           M -> world{currentScene = Main}
           J -> world{dungeonsPage = selectDown d_page}
@@ -39,7 +39,7 @@ handleDungeonScene world@World{dungeonsPage = d_page, dungeonPrep = d_prep} inp 
           _ -> world
         dg = getSelectedDungeon d_page
         battleResult = calcBattle dg $ randomGen world
-        updatedHs = fmap restoreHealth $ ((heros world) \\ herosComeBack) ++ herosComeBack
+        updatedHs = fmap restoreHealth $ (heros world) ++ herosComeBack
         herosComeBack = updatedHero battleResult
         restoreHealth h = h{hp = maxHP h}
         hs = heros world
@@ -60,6 +60,7 @@ handleDungeonPrepareScene world@World{dungeonPrep = d_prep, dungeonsPage = d_pag
       R -> world{dungeonPrep = removeMode d_prep}
       S -> if ((length $ team d_prep) > 0)
            then world{currentScene = Dungeons
+                     , heros = heros world \\ (team d_prep)
                      , dungeonsPage = comeBackFromStartMission d_page (team d_prep)}
            else world
       (Input n) -> world{dungeonPrep = newPrep (n-1)}
