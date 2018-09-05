@@ -2,9 +2,7 @@ module Core.DungeonsPage where
 
 import Core.Hero
 import Core.Dungeon
-import Core.DungeonPrepPage
 import Core.Utils
-import Data.List
 import Data.Maybe
 
 data DungeonsPage = DungeonsPage {
@@ -41,7 +39,8 @@ selectDown dp@DungeonsPage{dungeons = ds, currentSelection = cs} = dp {currentSe
 
 instance Show DungeonsPage where
   show DungeonsPage{dungeons = ds, currentSelection = c} =
-    "Press M to return Main page, J/K to move cursor Down, Up, Enter to prepare to enter selected Dungeon\n"
+    "Press M to return Main page, J/K to move cursor Down, Up\n" ++
+    "Enter to prepare to enter selected Dungeon \n\n"
     ++ concat final
     where lst = map show ds
           final = take c lst ++ dWithCursor ++ drop (c+1) lst

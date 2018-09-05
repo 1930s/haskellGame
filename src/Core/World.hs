@@ -36,7 +36,7 @@ instance Show World where
     case scene of
       HeroInfo -> concat $ map show allHero
       Main -> "press h to goto all heros \n" ++ "Number of heros: " ++ (show $ length allHero) ++ "\n"
-              ++ "press d to all dungones \n"
+              ++ "press d to all dungones \n" ++ "wealth: " ++ (show $ wealth world)
       Dungeons -> show d_page
       DungeonPrepare -> show $ dungeonPrep world
       FightResultScene -> show $ battleResultPage world
