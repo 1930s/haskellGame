@@ -1,88 +1,89 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Lib
     ( game
     ) where
 
-import System.Console.ANSI
-import System.IO
 import System.Random
-import System.Timeout
-import Control.Concurrent
-import Control.Concurrent.Async
-import Coord
-import Input
 import Core.World
 import HandleInput
+import Input
 
-gameInit :: IO ()
-gameInit = do
-  hSetEcho stdin False
-  hSetBuffering stdin NoBuffering
-  hSetBuffering stdout NoBuffering
-  hideCursor
-  setTitle "myRogue"
-  setSGR [SetConsoleIntensity BoldIntensity
-         , SetColor Foreground Vivid Blue]
+import Data.Monoid
 
-drawHero :: Coord -> IO ()
-drawHero (x,y) = do
-  clearScreen
-  setCursorPosition y x
-  putStr "@"
+import qualified Data.Vector as Vec
+import qualified Brick.Widgets.Border as B
+import qualified Brick.Widgets.Border.Style as BS
+import qualified Brick.Widgets.List as L
+import qualified Brick.Widgets.Center as C
+import Control.Monad (forever, void)
+import Control.Concurrent (threadDelay, forkIO)
+import Control.Monad.IO.Class (liftIO)
+import qualified Graphics.Vty as V
+import Brick.BChan(newBChan, writeBChan)
+import Brick
+  ( App(..), AttrMap, BrickEvent(..), EventM, Next, Widget
+  , customMain, neverShowCursor
+  , continue, halt
+  , hLimit, vLimit, vBox, hBox
+  , padRight, padLeft, padTop, padAll, Padding(..)
+  , withBorderStyle
+  , str
+  , attrMap, withAttr, emptyWidget, AttrName, on, fg
+  , (<+>)
+  )
 
 oneSecond :: Int
 oneSecond = (10::Int) ^ (6::Int)
 
-inputInterval :: Int
-inputInterval = div oneSecond 10
 
-drawGame :: World -> IO()
-drawGame world = do
-  clearScreen
-  setCursorPosition 0 0
-  putStr $ show world
-
-gameLoop :: World -> IO ()
-gameLoop world_ = do
-  let world = gameTick world_
-  drawGame world
-  input <- sample inputInterval getInput
-  if (currentScene world == Main && input == Just Q)
-    then handleExit
-    else handleInput world input
-
-handleInput :: World -> Maybe Input -> IO()
-handleInput w Nothing = gameLoop w
-handleInput w@(World {currentScene=scene}) (Just i)
-  | not $ isInputUseful w i = putStrLn "Invalid input" >> gameLoop w
-  | otherwise =
-    case scene of
-      Main -> gameLoop $ handleMainScene w i
-      Dungeons -> gameLoop $ handleDungeonScene w i
-      DungeonPrepare -> gameLoop $ handleDungeonPrepareScene w i
-      FightResultScene -> gameLoop $ handleFightResultScene w i
-      HeroInfo -> gameLoop $ handleHeroInfoScene w i
-      Fight -> gameLoop w
+app :: App World Tick Name
+app = App { appDraw = drawUI
+          , appChooseCursor = neverShowCursor
+          , appHandleEvent = handleEvent
+          , appStartEvent = return
+          , appAttrMap = const theMap
+          }
 
 game :: IO ()
 game = do
-  gameInit
   rGen <- getStdGen
-  gameLoop $ defaultWorld rGen
+  chan <- newBChan 10
+  _ <- forkIO $ forever $ do
+    writeBChan chan Tick
+    threadDelay $ oneSecond `div` 10
+  let g = defaultWorld rGen
+  void $ customMain (V.mkVty V.defaultConfig) (Just chan) app g
 
-handleExit :: IO ()
-handleExit = do
-  clearScreen
-  setCursorPosition 0 0
-  setSGR [Reset]
-  showCursor
-  putStrLn "exit game"
+handleEvent :: World -> BrickEvent Name Tick -> EventM Name (Next World)
+handleEvent w (AppEvent Tick) = continue $ gameTick w
+handleEvent w (VtyEvent (V.EvKey V.KEsc [])) = halt w
+handleEvent w e =
+  case brickEventToInput e of
+    Nothing -> continue w
+    Just i -> continue $ handleGameInput w i
 
--- The threadDelay is used so that the screen does not Blink
-sample :: Int -> IO a -> IO (Maybe a)
-sample l f
-  | l < 0 = fmap Just f
-  | l == 0 = return Nothing
-  | otherwise = concurrently (timeout l f) (threadDelay l)
-                >>= \ (result, _) -> return result
+drawUI :: World -> [Widget Name]
+drawUI w = [vBox [box]]
+  where box = withBorderStyle BS.unicodeBold
+          $ B.borderWithLabel (str "Brightest Dungeon")
+          $ C.hCenter
+          $ padAll 1
+          $ L.renderList drawStringList True
+          $ L.list () (Vec.fromList ["option1 ", "option2", "option3"]) 1
+
+drawStringList :: (Show a) => Bool -> a -> Widget Name
+drawStringList sel a =
+    let selStr s = if sel
+                   then withAttr customAttr (str $ "<" <> s <> ">")
+                   else str s
+    in C.hCenter $ str "* " <+> (selStr $ show a)
+
+customAttr :: AttrName
+customAttr = L.listSelectedAttr <> "custom"
+
+theMap :: AttrMap
+theMap = attrMap V.defAttr []
+
+

@@ -1,11 +1,11 @@
 module Input where
+import qualified Graphics.Vty as V
+import Brick
+  ( BrickEvent(..))
 
-import Text.Read
-import Data.Char
-import qualified Text.Read.Lex as L
-
-data Input = TICK
-           | A
+type Name = ()
+data Tick = Tick
+data Input = A
            | B
            | C
            | D
@@ -22,47 +22,13 @@ data Input = TICK
            | R
            | Enter
            | Input Int
-           deriving (Eq, Show)
+           deriving (Eq, Show, Read)
 
-instance Read Input where
-  readsPrec _ val = readF [("A",A)
-                          ,("B",B)
-                          ,("C",C)
-                          ,("D",D)
-                          ,("E",E)
-                          ,("F",F)
-                          ,("G",G)
-                          ,("H",H)
-                          ,("W",W)
-                          ,("S",S)
-                          ,("Q",Q)
-                          ,("M",M)
-                          ,("J",J)
-                          ,("K",K)
-                          ,("R",R)
-                          ,("\n",Enter)
-                          ,(" ",Enter)
-                          ,("1",Input 1)
-                          ,("2",Input 2)
-                          ,("3",Input 3)
-                          ,("4",Input 4)
-                          ,("5",Input 5)
-                          ,("6",Input 6)
-                          ,("7",Input 7)
-                          ,("8",Input 8)
-                          ,("9",Input 9)
-                          ]
-    where readF [] = []
-          readF ((attempt, result):xs) =
-            if (take (length attempt) val) == attempt
-                         then [(result, drop (length attempt) val)]
-                         else readF xs
-
-getInput :: IO (Input)
-getInput = do
-  key <- getChar
-  if isNumber key then return (Input $ digitToInt key) else
-    case (readMaybe [toUpper key] :: Maybe Input) of
-      Just i -> return i
-      Nothing -> getInput
-
+brickEventToInput :: BrickEvent Name Tick -> Maybe Input
+brickEventToInput (VtyEvent (V.EvKey (V.KChar '1') [])) = Just $ Input 1
+brickEventToInput (VtyEvent (V.EvKey (V.KChar '2') [])) = Just $ Input 2
+brickEventToInput (VtyEvent (V.EvKey (V.KChar '3') [])) = Just $ Input 3
+brickEventToInput (VtyEvent (V.EvKey (V.KChar '4') [])) = Just $ Input 4
+brickEventToInput (VtyEvent (V.EvKey (V.KEnter) [])) = Just $ Enter
+brickEventToInput (VtyEvent (V.EvKey (V.KChar ch) [])) = Just (read [ch] :: Input)
+brickEventToInput _ = Nothing

@@ -16,6 +16,16 @@ import Core.Dungeon(DungeonState(..),
 import Core.BattleResultPage
 import Input
 
+handleGameInput :: World -> Input -> World
+handleGameInput w@(World {currentScene=scene}) i =
+  case scene of
+    Main -> handleMainScene w i
+    Dungeons -> handleDungeonScene w i
+    DungeonPrepare -> handleDungeonPrepareScene w i
+    FightResultScene -> handleFightResultScene w i
+    HeroInfo -> handleHeroInfoScene w i
+    Fight -> w
+
 handleMainScene :: World -> Input -> World
 handleMainScene world inp = nw
   where nw = case inp of
