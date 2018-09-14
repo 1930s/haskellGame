@@ -2,10 +2,9 @@
 
 module Core.World where
 
+import qualified Brick.Widgets.List as L
+import qualified Data.Vector as Vec
 import System.Random
-import Data.List
-import qualified Data.Map.Strict as Map
-import Input
 import Core.Hero
 import Core.Enemy
 import Core.Dungeon
@@ -24,6 +23,7 @@ data Scene = Main
 data World = World {
   wealth :: Int,
   currentScene :: Scene ,
+  options :: L.List () String,
   heros :: [Hero],
   dungeonsPage :: DungeonsPage,
   battleResultPage :: BattleResultPage,
@@ -31,37 +31,21 @@ data World = World {
   randomGen :: StdGen
   }
 
-instance Show World where
-  show world@World {currentScene = scene, heros = allHero, dungeonsPage = d_page} =
-    case scene of
-      HeroInfo -> concat $ map show allHero
-      Main -> "press h to goto all heros \n" ++ "Number of heros: " ++ (show $ length allHero) ++ "\n"
-              ++ "press d to all dungones \n" ++ "wealth: " ++ (show $ wealth world)
-      Dungeons -> show d_page
-      DungeonPrepare -> show $ dungeonPrep world
-      FightResultScene -> show $ battleResultPage world
-      _ -> "World"
-
-sceneAvailableInput :: Map.Map Scene [Input]
-sceneAvailableInput = Map.fromList [
-  (Main, [D, H, Q]),
-  (Dungeons, [M, J, K, Enter]),
-  (DungeonPrepare, [D, A, R, S] ++ (fmap Input [1..9])),
-  (FightResultScene, [D, M]),
-  (HeroInfo, [M])]
-
-isInputUseful :: World -> Input -> Bool
-isInputUseful (World {currentScene = scene}) i =
-  case availableList of
-      Just l -> i `elem` l
-      Nothing -> False
-  where
-    availableList = Map.lookup scene sceneAvailableInput
-
+-- instance Show World where
+--   show world@World {currentScene = scene, heros = allHero, dungeonsPage = d_page} =
+--     case scene of
+--       HeroInfo -> concat $ map show allHero
+--       Main -> "press h to goto all heros \n" ++ "Number of heros: " ++ (show $ length allHero) ++ "\n"
+--               ++ "press d to all dungones \n" ++ "wealth: " ++ (show $ wealth world)
+--       Dungeons -> show d_page
+--       DungeonPrepare -> show $ dungeonPrep world
+--       FightResultScene -> show $ battleResultPage world
+--       _ -> "World"
 
 defaultWorld :: StdGen -> World
 defaultWorld rGen = World {
   wealth = 0,
+  options = L.list () (Vec.fromList $ ["Heros", "Dungeons"] ) 1,
   currentScene = Main,
   dungeonPrep = defaultPrepPage startHeros dungeon1 ,
   heros = startHeros,

@@ -14,6 +14,7 @@ import Core.Dungeon(DungeonState(..),
                     BattleResult(..),
                     calcBattle)
 import Core.BattleResultPage
+import qualified Brick.Widgets.List as L
 import Input
 
 handleGameInput :: World -> Input -> World
@@ -29,15 +30,23 @@ handleGameInput w@(World {currentScene=scene}) i =
 handleMainScene :: World -> Input -> World
 handleMainScene world inp = nw
   where nw = case inp of
-          D -> world{currentScene = Dungeons}
-          H -> world{currentScene = HeroInfo}
+          -- CharKey 'd' -> world{currentScene = Dungeons}
+          -- CharKey 'h' -> world{currentScene = HeroInfo}
+          KeyUP -> world{options = L.listMoveUp $ options world}
+          KeyDown -> world{options = L.listMoveDown $ options world}
+          Enter -> world{currentScene = nxtScene}
+          _ -> world
+        nxtScene = case L.listSelected $ options world of
+          Just 0 -> HeroInfo
+          Just 1 -> Dungeons
+          _ -> Main
 
 handleDungeonScene :: World -> Input -> World
 handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
   where nw = case inp of
-          M -> world{currentScene = Main}
-          J -> world{dungeonsPage = selectDown d_page}
-          K -> world{dungeonsPage = selectUp d_page}
+          CharKey 'm' -> world{currentScene = Main}
+          CharKey 'j' -> world{dungeonsPage = selectDown d_page}
+          CharKey 'k' -> world{dungeonsPage = selectUp d_page}
           Enter -> case state dg of
             NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
             MissionComplete -> world{currentScene = FightResultScene,
@@ -57,7 +66,7 @@ handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
 handleHeroInfoScene :: World -> Input -> World
 handleHeroInfoScene world inp = nw
   where nw = case inp of
-          M -> world{currentScene = Main}
+          CharKey 'm' -> world{currentScene = Main}
           _ -> world
 
 handleDungeonPrepareScene :: World -> Input -> World
@@ -65,21 +74,21 @@ handleDungeonPrepareScene world@World{dungeonPrep = d_prep, dungeonsPage = d_pag
   where
     newPrep n = addOrRemoveHero n d_prep
     nw = case inp of
-      D -> world{currentScene = Dungeons, dungeonPrep = d_prep{team = []}}
-      A -> world{dungeonPrep = addMode d_prep}
-      R -> world{dungeonPrep = removeMode d_prep}
-      S -> if ((length $ team d_prep) > 0)
+      CharKey 'd' -> world{currentScene = Dungeons, dungeonPrep = d_prep{team = []}}
+      CharKey 'a' -> world{dungeonPrep = addMode d_prep}
+      CharKey 'r' -> world{dungeonPrep = removeMode d_prep}
+      CharKey 's' -> if ((length $ team d_prep) > 0)
            then world{currentScene = Dungeons
                      , heros = heros world \\ (team d_prep)
                      , dungeonsPage = comeBackFromStartMission d_page (team d_prep)}
            else world
-      (Input n) -> world{dungeonPrep = newPrep (n-1)}
+      (NumKey n) -> world{dungeonPrep = newPrep (n-1)}
 
 handleFightResultScene :: World -> Input -> World
 handleFightResultScene world@World{battleResultPage = brp} inp = nw
   where nw = case inp of
-               M -> world{currentScene = Main}
-               D -> world{currentScene = Dungeons}
+          CharKey 'm' -> world{currentScene = Main}
+          CharKey 'd' -> world{currentScene = Dungeons}
 
 gameTick :: World -> World
 gameTick w@World{dungeonsPage = dp} = w{dungeonsPage = n_dp}

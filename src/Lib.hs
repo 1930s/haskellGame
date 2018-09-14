@@ -61,24 +61,24 @@ handleEvent w (AppEvent Tick) = continue $ gameTick w
 handleEvent w (VtyEvent (V.EvKey V.KEsc [])) = halt w
 handleEvent w e =
   case brickEventToInput e of
-    Nothing -> continue w
     Just i -> continue $ handleGameInput w i
+    _ -> continue w
 
 drawUI :: World -> [Widget Name]
-drawUI w = [vBox [box]]
+drawUI w@(World{currentScene = Main}) = [vBox [box]]
   where box = withBorderStyle BS.unicodeBold
           $ B.borderWithLabel (str "Brightest Dungeon")
           $ C.hCenter
           $ padAll 1
           $ L.renderList drawStringList True
-          $ L.list () (Vec.fromList ["option1 ", "option2", "option3"]) 1
+          $ options w
 
-drawStringList :: (Show a) => Bool -> a -> Widget Name
+drawStringList :: Bool -> String -> Widget Name
 drawStringList sel a =
     let selStr s = if sel
                    then withAttr customAttr (str $ "<" <> s <> ">")
                    else str s
-    in C.hCenter $ str "* " <+> (selStr $ show a)
+    in C.hCenter $ str "* " <+> (selStr $ a)
 
 customAttr :: AttrName
 customAttr = L.listSelectedAttr <> "custom"

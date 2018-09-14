@@ -5,30 +5,21 @@ import Brick
 
 type Name = ()
 data Tick = Tick
-data Input = A
-           | B
-           | C
-           | D
-           | E
-           | F
-           | G
-           | H
-           | W
-           | S
-           | Q
-           | M
-           | J
-           | K
-           | R
+
+data Input = CharKey Char
            | Enter
-           | Input Int
+           | KeyUP
+           | KeyDown
+           | NumKey Int
            deriving (Eq, Show, Read)
 
 brickEventToInput :: BrickEvent Name Tick -> Maybe Input
-brickEventToInput (VtyEvent (V.EvKey (V.KChar '1') [])) = Just $ Input 1
-brickEventToInput (VtyEvent (V.EvKey (V.KChar '2') [])) = Just $ Input 2
-brickEventToInput (VtyEvent (V.EvKey (V.KChar '3') [])) = Just $ Input 3
-brickEventToInput (VtyEvent (V.EvKey (V.KChar '4') [])) = Just $ Input 4
+brickEventToInput (VtyEvent (V.EvKey (V.KChar '1') [])) = Just $ NumKey 1
+brickEventToInput (VtyEvent (V.EvKey (V.KChar '2') [])) = Just $ NumKey 2
+brickEventToInput (VtyEvent (V.EvKey (V.KChar '3') [])) = Just $ NumKey 3
+brickEventToInput (VtyEvent (V.EvKey (V.KChar '4') [])) = Just $ NumKey 4
 brickEventToInput (VtyEvent (V.EvKey (V.KEnter) [])) = Just $ Enter
-brickEventToInput (VtyEvent (V.EvKey (V.KChar ch) [])) = Just (read [ch] :: Input)
+brickEventToInput (VtyEvent (V.EvKey (V.KUp) [])) = Just $ KeyUP
+brickEventToInput (VtyEvent (V.EvKey (V.KDown) [])) = Just $ KeyDown
+brickEventToInput (VtyEvent (V.EvKey (V.KChar ch) [])) = Just $ CharKey ch
 brickEventToInput _ = Nothing
