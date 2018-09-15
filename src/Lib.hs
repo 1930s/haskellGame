@@ -1,5 +1,4 @@
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Lib
     ( game
@@ -10,7 +9,6 @@ import Core.World
 import HandleInput
 import Input
 
-import Data.Monoid
 
 import qualified Data.Vector as Vec
 import qualified Brick.Widgets.Border as B
@@ -33,6 +31,7 @@ import Brick
   , attrMap, withAttr, emptyWidget, AttrName, on, fg
   , (<+>)
   )
+import UI
 
 oneSecond :: Int
 oneSecond = (10::Int) ^ (6::Int)
@@ -58,6 +57,7 @@ game = do
 
 handleEvent :: World -> BrickEvent Name Tick -> EventM Name (Next World)
 handleEvent w (AppEvent Tick) = continue $ gameTick w
+-- handleEvent w@World{currentScene = Main} (VtyEvent (V.EvKey V.KEsc [])) = halt w
 handleEvent w (VtyEvent (V.EvKey V.KEsc [])) = halt w
 handleEvent w e =
   case brickEventToInput e of
@@ -65,23 +65,11 @@ handleEvent w e =
     _ -> continue w
 
 drawUI :: World -> [Widget Name]
-drawUI w@(World{currentScene = Main}) = [vBox [box]]
-  where box = withBorderStyle BS.unicodeBold
-          $ B.borderWithLabel (str "Brightest Dungeon")
-          $ C.hCenter
-          $ padAll 1
-          $ L.renderList drawStringList True
-          $ options w
-
-drawStringList :: Bool -> String -> Widget Name
-drawStringList sel a =
-    let selStr s = if sel
-                   then withAttr customAttr (str $ "<" <> s <> ">")
-                   else str s
-    in C.hCenter $ str "* " <+> (selStr $ a)
-
-customAttr :: AttrName
-customAttr = L.listSelectedAttr <> "custom"
+drawUI w@(World{currentScene = scene}) =
+  case scene of Main -> drawMain w
+                HeroInfo -> drawHeroPage w
+                Dungeons -> drawDungeonsPage w
+                _ -> [vBox [str $ show scene]]
 
 theMap :: AttrMap
 theMap = attrMap V.defAttr []

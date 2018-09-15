@@ -1,5 +1,6 @@
 module HandleInput where
 
+import Data.Maybe
 import Data.List
 import Core.World
 import Core.Hero(Hero(..))
@@ -30,8 +31,6 @@ handleGameInput w@(World {currentScene=scene}) i =
 handleMainScene :: World -> Input -> World
 handleMainScene world inp = nw
   where nw = case inp of
-          -- CharKey 'd' -> world{currentScene = Dungeons}
-          -- CharKey 'h' -> world{currentScene = HeroInfo}
           KeyUP -> world{options = L.listMoveUp $ options world}
           KeyDown -> world{options = L.listMoveDown $ options world}
           Enter -> world{currentScene = nxtScene}
@@ -45,8 +44,6 @@ handleDungeonScene :: World -> Input -> World
 handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
   where nw = case inp of
           CharKey 'm' -> world{currentScene = Main}
-          CharKey 'j' -> world{dungeonsPage = selectDown d_page}
-          CharKey 'k' -> world{dungeonsPage = selectUp d_page}
           Enter -> case state dg of
             NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
             MissionComplete -> world{currentScene = FightResultScene,
@@ -56,7 +53,7 @@ handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
                                      battleResultPage = BattleResultPage battleResult }
             InProgress -> world
           _ -> world
-        dg = getSelectedDungeon d_page
+        (_,dg) = fromJust $ L.listSelectedElement $ dungeons d_page
         battleResult = calcBattle dg $ randomGen world
         updatedHs = fmap restoreHealth $ (heros world) ++ herosComeBack
         herosComeBack = updatedHero battleResult

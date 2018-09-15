@@ -31,25 +31,14 @@ data World = World {
   randomGen :: StdGen
   }
 
--- instance Show World where
---   show world@World {currentScene = scene, heros = allHero, dungeonsPage = d_page} =
---     case scene of
---       HeroInfo -> concat $ map show allHero
---       Main -> "press h to goto all heros \n" ++ "Number of heros: " ++ (show $ length allHero) ++ "\n"
---               ++ "press d to all dungones \n" ++ "wealth: " ++ (show $ wealth world)
---       Dungeons -> show d_page
---       DungeonPrepare -> show $ dungeonPrep world
---       FightResultScene -> show $ battleResultPage world
---       _ -> "World"
-
 defaultWorld :: StdGen -> World
 defaultWorld rGen = World {
   wealth = 0,
-  options = L.list () (Vec.fromList $ ["Heros", "Dungeons"] ) 1,
+  options = L.list () (Vec.fromList ["Heros", "Dungeons"] ) 1,
   currentScene = Main,
   dungeonPrep = defaultPrepPage startHeros dungeon1 ,
   heros = startHeros,
-  dungeonsPage = DungeonsPage [dungeon1, dungeon2] 0,
+  dungeonsPage = DungeonsPage $ L.list () (Vec.fromList [dungeon1, dungeon2]) 0,
   battleResultPage = BattleResultPage BattleResult{money = 0, updatedHero = []},
   randomGen = rGen
   }
