@@ -6,7 +6,7 @@ data BattleResultPage = BattleResultPage {
   result :: BattleResult
   }
 
-instance Show BattleResultPage where
-  show BattleResultPage{result = BattleResult{money = m, updatedHero = hs}}
-     = "Money gained: " ++ show m ++ "\n"
-       ++ "Heros: " ++ show hs
+-- instance Show BattleResultPage where
+--   show BattleResultPage{result = BattleResult{money = m, updatedHero = hs}}
+--      = "Money gained: " ++ show m ++ "\n"
+--        ++ "Heros: " ++ show hs

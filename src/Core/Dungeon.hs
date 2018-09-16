@@ -4,7 +4,7 @@ module Core.Dungeon (Dungeon(..)
                     , defaultDungeon
                     , startMission
                     , dungeonTick
-                    , calcBattle
+                    -- , calcBattle
                     , BattleResult(..)
                     , DungeonState(..)) where
 
@@ -14,7 +14,10 @@ import Data.Maybe
 import Constants
 import Core.Enemy
 import Core.Hero
-import Core.Utils(replaceAt)
+import Core.Utils(replaceAt, CursorName(Normal, DungeonPrepareTeam, DungeonPrepareBench))
+
+import qualified Brick.Widgets.List as L
+import qualified Data.Vector as Vec
 
 data DungeonState = NoMission
                   | InProgress
@@ -26,10 +29,13 @@ data Dungeon = Dungeon {
   name :: String,
   enemies :: [Enemy],
   missionLength :: Int,
-  herosInDungeon :: [Hero],
+  herosInDungeon :: L.List CursorName Hero,
   state :: DungeonState,
   countDown :: Int
-  } deriving (Eq)
+  }
+
+instance Eq Dungeon where
+  d == d2 = name (d :: Dungeon ) == name (d2 :: Dungeon )
 
 dungeonTick :: Dungeon -> Dungeon
 dungeonTick d@Dungeon{countDown = 0, state = InProgress} = d{state = MissionComplete}
@@ -38,7 +44,7 @@ dungeonTick dungeon = case state dungeon of
                         _ -> dungeon
                       where newCountDown = max 0 $ countDown dungeon - 1
 
-startMission :: [Hero] -> Dungeon -> Dungeon
+startMission :: L.List CursorName Hero -> Dungeon -> Dungeon
 startMission hs dg = dg{state = InProgress, countDown = missionLength dg, herosInDungeon = hs}
 
 defaultDungeon :: String -> [Enemy] -> Dungeon
@@ -46,36 +52,36 @@ defaultDungeon n es = Dungeon {
   name = n ,
   enemies = es,
   missionLength = 10 * inputRate,
-  herosInDungeon = [],
+  herosInDungeon = L.list Normal (Vec.fromList []) 1,
   state = NoMission,
   countDown = 0
   }
 
 data BattleResult = BattleResult {
   money :: Int,
-  updatedHero :: [Hero]
-  } deriving (Eq, Ord, Show)
+  updatedHero :: L.List CursorName Hero
+  }
 
-calcBattle :: Dungeon -> StdGen -> BattleResult
-calcBattle Dungeon{enemies = es, herosInDungeon = hs} gen =
-  calcBattle_ es gen BattleResult{money = 0, updatedHero = hs}
+-- calcBattle :: Dungeon -> StdGen -> BattleResult
+-- calcBattle Dungeon{enemies = es, herosInDungeon = hs} gen =
+--   calcBattle_ es gen BattleResult{money = 0, updatedHero = hs}
 
-calcBattle_ :: [Enemy] -> StdGen -> BattleResult -> BattleResult
-calcBattle_ es rGen bs@BattleResult{money = m, updatedHero = hs}
-  | enemyAllDead || heroAllDead = bs
-  | otherwise = calcBattle_ updatedEs newGen updatedBs
-    where
-      aliveEnemies = filter (\e -> hp (e::Enemy) > 0) es
-      aliveHeros = filter (\h -> hp (h::Hero) > 0) hs
-      actionHero = head aliveHeros
-      (randomEnemyIndex, newGen) = randomR (0, length aliveEnemies - 1) rGen
-      enemyToAtk = aliveEnemies !! randomEnemyIndex
-      (newHero, newEnemy, m_reward) = updateAfterAtk $ exchangeAtk actionHero enemyToAtk
-      updatedEs = fromJust $ replaceAt aliveEnemies newEnemy randomEnemyIndex
-      updatedHs = tail aliveHeros ++ [newHero]
-      enemyAllDead = length aliveEnemies == 0
-      heroAllDead = length aliveHeros == 0
-      updatedBs = bs{money = m + m_reward, updatedHero = updatedHs}
+-- calcBattle_ :: [Enemy] -> StdGen -> BattleResult -> BattleResult
+-- calcBattle_ es rGen bs@BattleResult{money = m, updatedHero = hs}
+--   | enemyAllDead || heroAllDead = bs
+--   | otherwise = calcBattle_ updatedEs newGen updatedBs
+--     where
+--       aliveEnemies = filter (\e -> hp (e::Enemy) > 0) es
+--       aliveHeros = filter (\h -> hp (h::Hero) > 0) hs
+--       actionHero = head aliveHeros
+--       (randomEnemyIndex, newGen) = randomR (0, length aliveEnemies - 1) rGen
+--       enemyToAtk = aliveEnemies !! randomEnemyIndex
+--       (newHero, newEnemy, m_reward) = updateAfterAtk $ exchangeAtk actionHero enemyToAtk
+--       updatedEs = fromJust $ replaceAt aliveEnemies newEnemy randomEnemyIndex
+--       updatedHs = tail aliveHeros ++ [newHero]
+--       enemyAllDead = length aliveEnemies == 0
+--       heroAllDead = length aliveHeros == 0
+--       updatedBs = bs{money = m + m_reward, updatedHero = updatedHs}
 
 updateAfterAtk :: (Hero, Enemy) -> (Hero, Enemy, Int)
 updateAfterAtk (h@Hero{expCap = o_cap, curExp = o_exp, level = o_l}, e)

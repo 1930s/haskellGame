@@ -5,6 +5,7 @@ module Core.World where
 import qualified Brick.Widgets.List as L
 import qualified Data.Vector as Vec
 import System.Random
+import Core.Utils(CursorName(..))
 import Core.Hero
 import Core.Enemy
 import Core.Dungeon
@@ -23,8 +24,8 @@ data Scene = Main
 data World = World {
   wealth :: Int,
   currentScene :: Scene ,
-  options :: L.List () String,
-  heros :: [Hero],
+  options :: L.List CursorName String,
+  heros :: L.List CursorName Hero,
   dungeonsPage :: DungeonsPage,
   battleResultPage :: BattleResultPage,
   dungeonPrep :: DungeonPrepPage,
@@ -34,12 +35,13 @@ data World = World {
 defaultWorld :: StdGen -> World
 defaultWorld rGen = World {
   wealth = 0,
-  options = L.list () (Vec.fromList ["Heros", "Dungeons"] ) 1,
+  options = L.list Normal (Vec.fromList ["Heros", "Dungeons"] ) 1,
   currentScene = Main,
-  dungeonPrep = defaultPrepPage startHeros dungeon1 ,
-  heros = startHeros,
-  dungeonsPage = DungeonsPage $ L.list () (Vec.fromList [dungeon1, dungeon2]) 0,
-  battleResultPage = BattleResultPage BattleResult{money = 0, updatedHero = []},
+  dungeonPrep = defaultPrepPage (L.list DungeonPrepareBench (Vec.fromList startHeros) 1) dungeon1 ,
+  heros = L.list Normal (Vec.fromList startHeros) 1,
+  dungeonsPage = DungeonsPage $ L.list Normal (Vec.fromList [dungeon1, dungeon2]) 1,
+  battleResultPage = BattleResultPage BattleResult{money = 0,
+                                                   updatedHero = L.list Normal (Vec.fromList []) 1},
   randomGen = rGen
   }
   where e1 = defaultEnemy "enemy1"

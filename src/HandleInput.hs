@@ -1,7 +1,8 @@
 module HandleInput where
 
+import qualified Data.Vector as Vec
 import Data.Maybe
-import Data.List
+import Core.Utils(CursorName(..))
 import Core.World
 import Core.Hero(Hero(..))
 import Core.DungeonPrepPage(addOrRemoveHero,
@@ -13,8 +14,10 @@ import Core.DungeonsPage
 import Core.Dungeon(DungeonState(..),
                     Dungeon(..),
                     BattleResult(..),
-                    calcBattle)
+                    -- calcBattle
+                   )
 import Core.BattleResultPage
+import Core.Utils(removeAllEqualElms)
 import qualified Brick.Widgets.List as L
 import Input
 
@@ -44,20 +47,23 @@ handleDungeonScene :: World -> Input -> World
 handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
   where nw = case inp of
           CharKey 'm' -> world{currentScene = Main}
+          KeyUP -> world{dungeonsPage= selectUp d_page}
+          KeyDown -> world{dungeonsPage= selectDown d_page}
           Enter -> case state dg of
             NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
-            MissionComplete -> world{currentScene = FightResultScene,
-                                     wealth = wealth world + money battleResult,
-                                     heros = updatedHs,
-                                     dungeonsPage = resetCompletedDungeon d_page,
-                                     battleResultPage = BattleResultPage battleResult }
+            MissionComplete -> world
+            -- MissionComplete -> world{currentScene = FightResultScene,
+            --                          wealth = wealth world + money battleResult,
+            --                          heros = updatedHs,
+            --                          dungeonsPage = resetCompletedDungeon d_page,
+            --                          battleResultPage = BattleResultPage battleResult }
             InProgress -> world
           _ -> world
         (_,dg) = fromJust $ L.listSelectedElement $ dungeons d_page
-        battleResult = calcBattle dg $ randomGen world
-        updatedHs = fmap restoreHealth $ (heros world) ++ herosComeBack
-        herosComeBack = updatedHero battleResult
-        restoreHealth h = h{hp = maxHP h}
+        -- battleResult = calcBattle dg $ randomGen world
+        -- updatedHs = fmap restoreHealth $ (heros world) ++ herosComeBack
+        -- herosComeBack = updatedHero battleResult
+        -- restoreHealth h = h{hp = maxHP h}
         hs = heros world
 
 handleHeroInfoScene :: World -> Input -> World
@@ -69,17 +75,19 @@ handleHeroInfoScene world inp = nw
 handleDungeonPrepareScene :: World -> Input -> World
 handleDungeonPrepareScene world@World{dungeonPrep = d_prep, dungeonsPage = d_page} inp = nw
   where
-    newPrep n = addOrRemoveHero n d_prep
+    newPrep n = addOrRemoveHero d_prep
     nw = case inp of
-      CharKey 'd' -> world{currentScene = Dungeons, dungeonPrep = d_prep{team = []}}
-      CharKey 'a' -> world{dungeonPrep = addMode d_prep}
-      CharKey 'r' -> world{dungeonPrep = removeMode d_prep}
+      CharKey 'd' -> world{currentScene = Dungeons,
+                           dungeonPrep = d_prep{team = L.list Normal (Vec.fromList []) 1}}
+      KeyRight -> world{dungeonPrep = addMode d_prep}
+      KeyLeft -> world{dungeonPrep = removeMode d_prep}
       CharKey 's' -> if ((length $ team d_prep) > 0)
            then world{currentScene = Dungeons
-                     , heros = heros world \\ (team d_prep)
+                     , heros = removeAllEqualElms (heros world) (team d_prep)
                      , dungeonsPage = comeBackFromStartMission d_page (team d_prep)}
            else world
       (NumKey n) -> world{dungeonPrep = newPrep (n-1)}
+      _ -> world
 
 handleFightResultScene :: World -> Input -> World
 handleFightResultScene world@World{battleResultPage = brp} inp = nw

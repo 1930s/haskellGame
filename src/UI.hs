@@ -21,8 +21,10 @@ import Brick
   )
 import Core.World
 import Core.DungeonsPage
+import Core.DungeonPrepPage
+import Core.Utils
 
-drawMain :: World -> [Widget Name]
+drawMain :: World -> [Widget CursorName]
 drawMain w = [vBox [box]]
   where box = withBorderStyle BS.unicodeBold
               $ B.borderWithLabel (str "Brightest Dungeon")
@@ -31,21 +33,43 @@ drawMain w = [vBox [box]]
               $ L.renderList drawStringList True
               $ options w
 
-drawHeroPage :: World -> [Widget Name]
+drawHeroPage :: World -> [Widget CursorName]
 drawHeroPage w@World{heros = hs} = [vBox [box]]
   where box = B.borderWithLabel (str "Heros")
               $ C.hCenter
               $ L.renderList drawStringList True
-              $ L.list () (Vec.fromList $ map show hs) 1
+              $ fmap show hs
 
-drawDungeonsPage :: World -> [Widget Name]
+drawDungeonsPage :: World -> [Widget CursorName]
 drawDungeonsPage w@World{ dungeonsPage = dp@DungeonsPage{dungeons = ds}} = [vBox [box]]
   where box = B.borderWithLabel (str "Dungeons")
               $ C.hCenter
               $ L.renderList drawStringList True
               $ fmap show ds
 
-drawStringList :: Bool -> String -> Widget Name
+drawDungeonPreparePage :: World -> [Widget CursorName]
+drawDungeonPreparePage w@World{ dungeonPrep = dpp} = drawDungeonPreparePage_ dpp
+
+drawDungeonPreparePage_ :: DungeonPrepPage -> [Widget CursorName]
+drawDungeonPreparePage_ DungeonPrepPage{
+  benchHeros = benchHeros,
+  team = team,
+  mode = mode,
+  dungeon = dungeon
+  } = [hBox [teamBox], hBox[benchBox]]
+  where benchBox = B.borderWithLabel (str "Bench heros")
+              $ C.hCenter
+              $ L.renderList drawStringList True
+              $ fmap show benchHeros
+        teamBox = B.borderWithLabel (str "Team")
+              $ C.hCenter
+              $ L.renderList drawStringList True
+              $ fmap show team
+
+drawStringListNoSelect :: Bool -> String -> Widget CursorName
+drawStringListNoSelect sel a = C.hCenter $ str "* " <+> (str a)
+
+drawStringList :: Bool -> String -> Widget CursorName
 drawStringList sel a =
     let selStr s = if sel
                    then withAttr customAttr (str $ "<" <> s <> ">")
