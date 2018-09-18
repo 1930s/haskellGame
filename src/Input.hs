@@ -9,7 +9,7 @@ data Tick = Tick
 
 data Input = CharKey Char
            | Enter
-           | KeyUP
+           | KeyUp
            | KeyDown
            | KeyLeft
            | KeyRight
@@ -24,7 +24,7 @@ brickEventToInput (VtyEvent (V.EvKey (V.KChar '3') [])) = Just $ NumKey 3
 brickEventToInput (VtyEvent (V.EvKey (V.KChar '4') [])) = Just $ NumKey 4
 brickEventToInput (VtyEvent (V.EvKey (V.KEnter) [])) = Just $ Enter
 brickEventToInput (VtyEvent (V.EvKey (V.KEsc) [])) = Just $ KeyEsc
-brickEventToInput (VtyEvent (V.EvKey (V.KUp) [])) = Just $ KeyUP
+brickEventToInput (VtyEvent (V.EvKey (V.KUp) [])) = Just $ KeyUp
 brickEventToInput (VtyEvent (V.EvKey (V.KDown) [])) = Just $ KeyDown
 brickEventToInput (VtyEvent (V.EvKey (V.KLeft) [])) = Just $ KeyLeft
 brickEventToInput (VtyEvent (V.EvKey (V.KRight) [])) = Just $ KeyRight

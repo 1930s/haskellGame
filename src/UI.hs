@@ -56,25 +56,28 @@ drawDungeonPreparePage_ DungeonPrepPage{
   team = team,
   mode = mode,
   dungeon = dungeon
-  } = [hBox [teamBox], hBox[benchBox]]
+  } = [vBox [hBox [teamBox, benchBox], str "Press s to start mission"]]
   where benchBox = B.borderWithLabel (str "Bench heros")
               $ C.hCenter
-              $ L.renderList drawStringList True
+              $ L.renderList drawBenchList True
               $ fmap show benchHeros
         teamBox = B.borderWithLabel (str "Team")
               $ C.hCenter
-              $ L.renderList drawStringList True
+              $ L.renderList drawTeamList True
               $ fmap show team
+        (drawBenchList, drawTeamList) = case mode of
+          Add -> (drawStringList, drawStringListNoSelect)
+          Remove -> (drawStringListNoSelect, drawStringList)
 
 drawStringListNoSelect :: Bool -> String -> Widget CursorName
-drawStringListNoSelect sel a = C.hCenter $ str "* " <+> (str a)
+drawStringListNoSelect sel a = C.hCenter $ str a
 
 drawStringList :: Bool -> String -> Widget CursorName
 drawStringList sel a =
     let selStr s = if sel
-                   then withAttr customAttr (str $ "<" <> s <> ">")
+                   then withAttr customAttr (str $ "* <" <> s <> ">")
                    else str s
-    in C.hCenter $ str "* " <+> (selStr $ a)
+    in C.hCenter $ selStr $ a
 
 customAttr :: AttrName
 customAttr = L.listSelectedAttr <> "custom"

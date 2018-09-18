@@ -9,6 +9,7 @@ import Core.DungeonPrepPage(addOrRemoveHero,
                             defaultPrepPage,
                             addMode,
                             removeMode,
+                            moveUpDownselection,
                             DungeonPrepPage(..))
 import Core.DungeonsPage
 import Core.Dungeon(DungeonState(..),
@@ -34,7 +35,7 @@ handleGameInput w@(World {currentScene=scene}) i =
 handleMainScene :: World -> Input -> World
 handleMainScene world inp = nw
   where nw = case inp of
-          KeyUP -> world{options = L.listMoveUp $ options world}
+          KeyUp -> world{options = L.listMoveUp $ options world}
           KeyDown -> world{options = L.listMoveDown $ options world}
           Enter -> world{currentScene = nxtScene}
           _ -> world
@@ -47,7 +48,7 @@ handleDungeonScene :: World -> Input -> World
 handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
   where nw = case inp of
           CharKey 'm' -> world{currentScene = Main}
-          KeyUP -> world{dungeonsPage= selectUp d_page}
+          KeyUp -> world{dungeonsPage= selectUp d_page}
           KeyDown -> world{dungeonsPage= selectDown d_page}
           Enter -> case state dg of
             NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
@@ -75,18 +76,20 @@ handleHeroInfoScene world inp = nw
 handleDungeonPrepareScene :: World -> Input -> World
 handleDungeonPrepareScene world@World{dungeonPrep = d_prep, dungeonsPage = d_page} inp = nw
   where
-    newPrep n = addOrRemoveHero d_prep
+    newPrep = addOrRemoveHero d_prep
     nw = case inp of
       CharKey 'd' -> world{currentScene = Dungeons,
                            dungeonPrep = d_prep{team = L.list Normal (Vec.fromList []) 1}}
       KeyRight -> world{dungeonPrep = addMode d_prep}
       KeyLeft -> world{dungeonPrep = removeMode d_prep}
+      KeyUp -> world{dungeonPrep = moveUpDownselection d_prep KeyUp}
+      KeyDown -> world{dungeonPrep = moveUpDownselection d_prep KeyDown}
       CharKey 's' -> if ((length $ team d_prep) > 0)
            then world{currentScene = Dungeons
                      , heros = removeAllEqualElms (heros world) (team d_prep)
                      , dungeonsPage = comeBackFromStartMission d_page (team d_prep)}
            else world
-      (NumKey n) -> world{dungeonPrep = newPrep (n-1)}
+      Enter -> world{dungeonPrep = newPrep }
       _ -> world
 
 handleFightResultScene :: World -> Input -> World

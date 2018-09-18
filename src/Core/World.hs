@@ -59,4 +59,23 @@ defaultWorld rGen = World {
               level = 1,
               curExp = 0,
               expCap = 10
-              }]
+              },
+          Hero {
+              name = "hero2",
+              maxHP = 10,
+              hp = 10,
+              atk = 2,
+              level = 1,
+              curExp = 0,
+              expCap = 10
+              },
+          Hero {
+              name = "hero3",
+              maxHP = 10,
+              hp = 10,
+              atk = 2,
+              level = 1,
+              curExp = 0,
+              expCap = 10
+              }
+          ]

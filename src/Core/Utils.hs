@@ -34,5 +34,5 @@ removeAllEqualElms :: Eq n => L.List CursorName n -> L.List CursorName n -> L.Li
 removeAllEqualElms lst rmv = foldr (\i l -> L.listRemove i l) lst idxes
   where lstVec = L.listElements lst
         rmvVec = L.listElements rmv
-        idxes = [ getIdxToRmv i | i <- [0..(length rmvVec)]]
+        idxes = [ getIdxToRmv i | i <- [0..(length rmvVec -1)]]
         getIdxToRmv n = fromJust $ Vec.findIndex (\e -> e == rmvVec Vec.! n) lstVec
