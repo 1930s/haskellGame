@@ -4,7 +4,7 @@ module Core.Dungeon (Dungeon(..)
                     , defaultDungeon
                     , startMission
                     , dungeonTick
-                    -- , calcBattle
+                    , calcBattle
                     , BattleResult(..)
                     , DungeonState(..)) where
 
@@ -14,7 +14,7 @@ import Data.Maybe
 import Constants
 import Core.Enemy
 import Core.Hero
-import Core.Utils(replaceAt, CursorName(Normal, DungeonPrepareTeam, DungeonPrepareBench))
+import Core.Utils(replaceAt, CursorName(Normal))
 
 import qualified Brick.Widgets.List as L
 import qualified Data.Vector as Vec
@@ -62,26 +62,26 @@ data BattleResult = BattleResult {
   updatedHero :: L.List CursorName Hero
   }
 
--- calcBattle :: Dungeon -> StdGen -> BattleResult
--- calcBattle Dungeon{enemies = es, herosInDungeon = hs} gen =
---   calcBattle_ es gen BattleResult{money = 0, updatedHero = hs}
+calcBattle :: Dungeon -> StdGen -> BattleResult
+calcBattle Dungeon{enemies = es, herosInDungeon = hs} gen =
+  calcBattle_ es gen BattleResult{money = 0, updatedHero = hs}
 
--- calcBattle_ :: [Enemy] -> StdGen -> BattleResult -> BattleResult
--- calcBattle_ es rGen bs@BattleResult{money = m, updatedHero = hs}
---   | enemyAllDead || heroAllDead = bs
---   | otherwise = calcBattle_ updatedEs newGen updatedBs
---     where
---       aliveEnemies = filter (\e -> hp (e::Enemy) > 0) es
---       aliveHeros = filter (\h -> hp (h::Hero) > 0) hs
---       actionHero = head aliveHeros
---       (randomEnemyIndex, newGen) = randomR (0, length aliveEnemies - 1) rGen
---       enemyToAtk = aliveEnemies !! randomEnemyIndex
---       (newHero, newEnemy, m_reward) = updateAfterAtk $ exchangeAtk actionHero enemyToAtk
---       updatedEs = fromJust $ replaceAt aliveEnemies newEnemy randomEnemyIndex
---       updatedHs = tail aliveHeros ++ [newHero]
---       enemyAllDead = length aliveEnemies == 0
---       heroAllDead = length aliveHeros == 0
---       updatedBs = bs{money = m + m_reward, updatedHero = updatedHs}
+calcBattle_ :: [Enemy] -> StdGen -> BattleResult -> BattleResult
+calcBattle_ es rGen bs@BattleResult{money = m, updatedHero = hs}
+  | enemyAllDead || heroAllDead = bs
+  | otherwise = calcBattle_ updatedEs newGen updatedBs
+    where
+      aliveEnemies = filter (\e -> hp (e::Enemy) > 0) es
+      aliveHeros = Vec.filter (\h -> hp (h::Hero) > 0) $ L.listElements hs
+      actionHero = Vec.head aliveHeros
+      (randomEnemyIndex, newGen) = randomR (0, length aliveEnemies - 1) rGen
+      enemyToAtk = aliveEnemies !! randomEnemyIndex
+      (newHero, newEnemy, m_reward) = updateAfterAtk $ exchangeAtk actionHero enemyToAtk
+      updatedEs = fromJust $ replaceAt aliveEnemies newEnemy randomEnemyIndex
+      updatedHs = Vec.tail aliveHeros Vec.++ Vec.fromList [newHero]
+      enemyAllDead = length aliveEnemies == 0
+      heroAllDead = length aliveHeros == 0
+      updatedBs = bs{money = m + m_reward, updatedHero = L.list Normal updatedHs 1}
 
 updateAfterAtk :: (Hero, Enemy) -> (Hero, Enemy, Int)
 updateAfterAtk (h@Hero{expCap = o_cap, curExp = o_exp, level = o_l}, e)

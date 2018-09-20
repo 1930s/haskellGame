@@ -15,7 +15,7 @@ import Core.DungeonsPage
 import Core.Dungeon(DungeonState(..),
                     Dungeon(..),
                     BattleResult(..),
-                    -- calcBattle
+                    calcBattle
                    )
 import Core.BattleResultPage
 import Core.Utils(removeAllEqualElms)
@@ -52,19 +52,18 @@ handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
           KeyDown -> world{dungeonsPage= selectDown d_page}
           Enter -> case state dg of
             NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
-            MissionComplete -> world
-            -- MissionComplete -> world{currentScene = FightResultScene,
-            --                          wealth = wealth world + money battleResult,
-            --                          heros = updatedHs,
-            --                          dungeonsPage = resetCompletedDungeon d_page,
-            --                          battleResultPage = BattleResultPage battleResult }
+            MissionComplete -> world{currentScene = FightResultScene,
+                                     wealth = wealth world + money battleResult,
+                                     heros = updatedHs,
+                                     dungeonsPage = resetCompletedDungeon d_page,
+                                     battleResultPage = BattleResultPage battleResult }
             InProgress -> world
           _ -> world
         (_,dg) = fromJust $ L.listSelectedElement $ dungeons d_page
-        -- battleResult = calcBattle dg $ randomGen world
-        -- updatedHs = fmap restoreHealth $ (heros world) ++ herosComeBack
-        -- herosComeBack = updatedHero battleResult
-        -- restoreHealth h = h{hp = maxHP h}
+        battleResult = calcBattle dg $ randomGen world
+        updatedHs = fmap restoreHealth $ foldr (\h l-> L.listInsert 0 h l) (heros world) herosComeBack
+        herosComeBack = updatedHero battleResult
+        restoreHealth h = h{hp = maxHP h}
         hs = heros world
 
 handleHeroInfoScene :: World -> Input -> World
@@ -97,6 +96,7 @@ handleFightResultScene world@World{battleResultPage = brp} inp = nw
   where nw = case inp of
           CharKey 'm' -> world{currentScene = Main}
           CharKey 'd' -> world{currentScene = Dungeons}
+          _ -> world
 
 gameTick :: World -> World
 gameTick w@World{dungeonsPage = dp} = w{dungeonsPage = n_dp}

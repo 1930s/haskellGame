@@ -71,6 +71,7 @@ drawUI w@(World{currentScene = scene}) =
                 HeroInfo -> drawHeroPage w
                 Dungeons -> drawDungeonsPage w
                 DungeonPrepare -> drawDungeonPreparePage w
+                FightResultScene -> drawFightResultScene w
                 _ -> [vBox [str $ show scene]]
 
 theMap :: AttrMap

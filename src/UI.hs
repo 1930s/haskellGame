@@ -20,8 +20,11 @@ import Brick
   , (<+>)
   )
 import Core.World
+import Core.Hero
+import Core.Dungeon
 import Core.DungeonsPage
 import Core.DungeonPrepPage
+import Core.BattleResultPage
 import Core.Utils
 
 drawMain :: World -> [Widget CursorName]
@@ -37,8 +40,7 @@ drawHeroPage :: World -> [Widget CursorName]
 drawHeroPage w@World{heros = hs} = [vBox [box]]
   where box = B.borderWithLabel (str "Heros")
               $ C.hCenter
-              $ L.renderList drawStringList True
-              $ fmap show hs
+              $ L.renderList drawHero True hs
 
 drawDungeonsPage :: World -> [Widget CursorName]
 drawDungeonsPage w@World{ dungeonsPage = dp@DungeonsPage{dungeons = ds}} = [vBox [box]]
@@ -59,23 +61,69 @@ drawDungeonPreparePage_ DungeonPrepPage{
   } = [vBox [hBox [teamBox, benchBox], str "Press s to start mission"]]
   where benchBox = B.borderWithLabel (str "Bench heros")
               $ C.hCenter
-              $ L.renderList drawBenchList True
-              $ fmap show benchHeros
+              $ L.renderList drawBenchList True benchHeros
         teamBox = B.borderWithLabel (str "Team")
               $ C.hCenter
-              $ L.renderList drawTeamList True
-              $ fmap show team
+              $ L.renderList drawTeamList True team
         (drawBenchList, drawTeamList) = case mode of
-          Add -> (drawStringList, drawStringListNoSelect)
-          Remove -> (drawStringListNoSelect, drawStringList)
+          Add -> (drawHero, drawHeroNoSelect)
+          Remove -> (drawHeroNoSelect, drawHero)
+
+drawFightResultScene :: World -> [Widget CursorName]
+drawFightResultScene w@World{
+  battleResultPage = bRP } = [vBox [summaryBox, heroBox]]
+  where res = result bRP
+        hs = updatedHero res
+        heroBox =
+          padTop (Pad 3)
+          $ B.borderWithLabel (str "Updated heros")
+          $ C.hCenter
+          $ L.renderList drawHeroNoSelect True hs
+        summaryBox =
+          B.borderWithLabel (str "Summary")
+          $ C.hCenter
+          $ str $ "Money" ++ (show $ money res)
+
+drawHeroNoSelect :: Bool -> Hero -> Widget CursorName
+drawHeroNoSelect _ h = drawHero False h
+
+drawHero :: Bool -> Hero -> Widget CursorName
+drawHero sel h =
+  B.borderWithLabel (str $ selectedIndicator ++ (name (h :: Hero)))
+  $ C.hCenter
+  $ vBox
+  $ fmap str [
+  heartUnicode ++ (show $ hp h),
+  swordUnicode ++ (show $ atk h),
+  "level: " ++ (show $ level h),
+  (take expPer $ repeat '#') ++ (take (expBarMax - expPer) $ repeat '-')
+  ]
+  where
+    selectedIndicator = case sel of
+      True -> " * "
+      False -> []
+    expBarMax = 10
+    expPer = case (curExp h) of
+      0 -> 0
+      n -> (expCap h) `div` n
+
 
 drawStringListNoSelect :: Bool -> String -> Widget CursorName
-drawStringListNoSelect sel a = C.hCenter $ str a
+drawStringListNoSelect _ a = drawStringList False a
+
+selectUnicode:: String
+selectUnicode = ['\10144']
+
+heartUnicode :: String
+heartUnicode = ['\9829']
+
+swordUnicode :: String
+swordUnicode = ['\9876']
 
 drawStringList :: Bool -> String -> Widget CursorName
 drawStringList sel a =
     let selStr s = if sel
-                   then withAttr customAttr (str $ "* <" <> s <> ">")
+                   then withAttr customAttr (str $ selectUnicode <> " <" <> s <> ">")
                    else str s
     in C.hCenter $ selStr $ a
 

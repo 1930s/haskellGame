@@ -7,4 +7,4 @@ data ItemType = Gold
 data Item = Item {
   name :: String,
   price :: Int
-                 }
+  }
