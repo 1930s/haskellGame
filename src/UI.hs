@@ -86,31 +86,30 @@ drawFightResultScene w@World{
 
 drawDungeon :: Bool -> Dungeon -> Widget CursorName
 drawDungeon sel h@Dungeon{
-  name = n,
+  name = nm,
   enemies = es,
   missionLength = missonL,
   herosInDungeon = hs,
   state = stt,
   countDown = cd
-  } =  B.borderWithLabel (str $ selectedIndicator ++ n)
+  } =
+  renderBoxWithName nm sel
   $ C.hCenter
   $ vBox [renderEnemyNum, renderState, str $ renderProgress ]
-  where selectedIndicator = case sel of
-          True -> " * "
-          False -> []
-        renderEnemyNum = str $ "Number of enemies: " ++ (show $ length es)
-        renderState = str $ show stt
-        renderProgress = case stt of
-          InProgress -> renderProgressBar cd missonL
-          MissionComplete -> "Completed!"
-          _ -> ""
+  where
+    renderEnemyNum = str $ "Number of enemies: " ++ (show $ length es)
+    renderState = str $ show stt
+    renderProgress = case stt of
+      InProgress -> renderProgressBar cd missonL
+      MissionComplete -> "Completed!"
+      _ -> ""
 
 drawHeroNoSelect :: Bool -> Hero -> Widget CursorName
 drawHeroNoSelect _ h = drawHero False h
 
 drawHero :: Bool -> Hero -> Widget CursorName
-drawHero sel h =
-  B.borderWithLabel (str $ selectedIndicator ++ (name (h :: Hero)))
+drawHero sel h@Hero{name = nm} =
+  renderBoxWithName nm sel
   $ C.hCenter
   $ vBox
   $ fmap str [
@@ -120,9 +119,6 @@ drawHero sel h =
   renderProgressBar expPer expBarMax
   ]
   where
-    selectedIndicator = case sel of
-      True -> " * "
-      False -> []
     expBarMax = 10
     expPer = case (curExp h) of
       0 -> 0
@@ -150,6 +146,16 @@ swordUnicode = ['\9876']
 
 customAttr :: AttrName
 customAttr = L.listSelectedAttr <> "custom"
+
+renderBoxWithName :: String -> Bool -> Widget CursorName -> Widget CursorName
+renderBoxWithName nm True w = withBorderStyle
+  BS.unicodeBold
+  $ B.borderWithLabel (str $ " * " ++ nm )
+  $ w
+renderBoxWithName nm False w = withBorderStyle
+  BS.unicode
+  $ B.borderWithLabel (str $ nm )
+  $ w
 
 renderProgressBar :: Int -> Int -> String
 renderProgressBar p m = (take p $ repeat '#') ++ (take (m - p) $ repeat '-')

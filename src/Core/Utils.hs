@@ -12,6 +12,8 @@ import qualified Data.Vector as Vec
 data CursorName = Normal
                 | DungeonPrepareTeam
                 | DungeonPrepareBench
+                | BattleHeros
+                | BattleEnemies
                 deriving(Eq, Ord, Show)
 
 isIndexValid :: [a] -> Int -> Bool

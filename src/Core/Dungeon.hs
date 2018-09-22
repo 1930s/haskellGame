@@ -9,7 +9,6 @@ module Core.Dungeon (Dungeon(..)
                     , DungeonState(..)) where
 
 import System.Random
-import Data.List
 import Data.Maybe
 import Constants
 import Core.Enemy
@@ -100,17 +99,3 @@ exchangeAtk h@Hero{atk = h_atk, hp = h_hp} e@Enemy{atk = e_atk, hp = e_hp} =
   (nh, ne)
   where nh = h{hp = max 0 h_hp - e_atk} :: Hero
         ne = e{hp = max 0 e_hp - h_atk} :: Enemy
-
-instance Show Dungeon where
-  show dungeon = intercalate "\n" toDisplay ++ "\n"
-    where
-      progress = countDown dungeon `div` inputRate
-      show_state = show $ state dungeon
-      show_progress = case state dungeon of
-        InProgress -> "Progress: " ++ (take progress $ repeat '#')
-        MissionComplete -> "Completed!"
-        _ -> ""
-      show_name = show (name (dungeon :: Dungeon))
-      show_num = "number of enemies: " ++ (show $length (enemies dungeon))
-      show_time = "time taken to complete: " ++ (show $ missionLength dungeon)
-      toDisplay = ["Dungeon: ", show_name, show_num, show_time, show_state, show_progress, "--"]
