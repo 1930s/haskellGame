@@ -70,6 +70,8 @@ handleHeroInfoScene :: World -> Input -> World
 handleHeroInfoScene world inp = nw
   where nw = case inp of
           CharKey 'm' -> world{currentScene = Main}
+          KeyUp -> world{heros = L.listMoveUp (heros world)}
+          KeyDown -> world{heros = L.listMoveDown (heros world)}
           _ -> world
 
 handleDungeonPrepareScene :: World -> Input -> World

@@ -46,8 +46,8 @@ drawDungeonsPage :: World -> [Widget CursorName]
 drawDungeonsPage w@World{ dungeonsPage = dp@DungeonsPage{dungeons = ds}} = [vBox [box]]
   where box = B.borderWithLabel (str "Dungeons")
               $ C.hCenter
-              $ L.renderList drawStringList True
-              $ fmap show ds
+              $ L.renderList drawDungeon True
+              $ ds
 
 drawDungeonPreparePage :: World -> [Widget CursorName]
 drawDungeonPreparePage w@World{ dungeonPrep = dpp} = drawDungeonPreparePage_ dpp
@@ -84,6 +84,27 @@ drawFightResultScene w@World{
           $ C.hCenter
           $ str $ "Money" ++ (show $ money res)
 
+drawDungeon :: Bool -> Dungeon -> Widget CursorName
+drawDungeon sel h@Dungeon{
+  name = n,
+  enemies = es,
+  missionLength = missonL,
+  herosInDungeon = hs,
+  state = stt,
+  countDown = cd
+  } =  B.borderWithLabel (str $ selectedIndicator ++ n)
+  $ C.hCenter
+  $ vBox [renderEnemyNum, renderState, str $ renderProgress ]
+  where selectedIndicator = case sel of
+          True -> " * "
+          False -> []
+        renderEnemyNum = str $ "Number of enemies: " ++ (show $ length es)
+        renderState = str $ show stt
+        renderProgress = case stt of
+          InProgress -> renderProgressBar cd missonL
+          MissionComplete -> "Completed!"
+          _ -> ""
+
 drawHeroNoSelect :: Bool -> Hero -> Widget CursorName
 drawHeroNoSelect _ h = drawHero False h
 
@@ -96,7 +117,7 @@ drawHero sel h =
   heartUnicode ++ (show $ hp h),
   swordUnicode ++ (show $ atk h),
   "level: " ++ (show $ level h),
-  (take expPer $ repeat '#') ++ (take (expBarMax - expPer) $ repeat '-')
+  renderProgressBar expPer expBarMax
   ]
   where
     selectedIndicator = case sel of
@@ -111,6 +132,13 @@ drawHero sel h =
 drawStringListNoSelect :: Bool -> String -> Widget CursorName
 drawStringListNoSelect _ a = drawStringList False a
 
+drawStringList :: Bool -> String -> Widget CursorName
+drawStringList sel a =
+    let selStr s = if sel
+                   then withAttr customAttr (str $ selectUnicode <> " <" <> s <> ">")
+                   else str s
+    in C.hCenter $ selStr $ a
+
 selectUnicode:: String
 selectUnicode = ['\10144']
 
@@ -120,13 +148,8 @@ heartUnicode = ['\9829']
 swordUnicode :: String
 swordUnicode = ['\9876']
 
-drawStringList :: Bool -> String -> Widget CursorName
-drawStringList sel a =
-    let selStr s = if sel
-                   then withAttr customAttr (str $ selectUnicode <> " <" <> s <> ">")
-                   else str s
-    in C.hCenter $ selStr $ a
-
 customAttr :: AttrName
 customAttr = L.listSelectedAttr <> "custom"
 
+renderProgressBar :: Int -> Int -> String
+renderProgressBar p m = (take p $ repeat '#') ++ (take (m - p) $ repeat '-')

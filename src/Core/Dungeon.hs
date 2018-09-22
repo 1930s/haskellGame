@@ -107,9 +107,9 @@ instance Show Dungeon where
       progress = countDown dungeon `div` inputRate
       show_state = show $ state dungeon
       show_progress = case state dungeon of
-                        InProgress -> "Progress: " ++ (take progress $ repeat '#')
-                        MissionComplete -> "Completed!"
-                        _ -> ""
+        InProgress -> "Progress: " ++ (take progress $ repeat '#')
+        MissionComplete -> "Completed!"
+        _ -> ""
       show_name = show (name (dungeon :: Dungeon))
       show_num = "number of enemies: " ++ (show $length (enemies dungeon))
       show_time = "time taken to complete: " ++ (show $ missionLength dungeon)
