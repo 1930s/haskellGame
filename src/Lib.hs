@@ -32,7 +32,7 @@ import Brick
   , attrMap, withAttr, emptyWidget, AttrName, on, fg
   , (<+>)
   )
-import UI
+import UI.Main
 
 oneSecond :: Int
 oneSecond = (10::Int) ^ (6::Int)

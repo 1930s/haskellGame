@@ -1,7 +1,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module UI where
+module UI.Main where
 
 import Data.Monoid
 import Input
