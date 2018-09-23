@@ -15,8 +15,8 @@ import Core.DungeonsPage
 import Core.Dungeon(DungeonState(..),
                     Dungeon(..),
                     BattleResult(..),
-                    calcBattle
-                   )
+                    calcBattle)
+import qualified Core.BattlePage as BP
 import Core.BattleResultPage
 import Core.Utils(removeAllEqualElms)
 import qualified Brick.Widgets.List as L
@@ -75,7 +75,7 @@ handleHeroInfoScene world inp = nw
           _ -> world
 
 handleDungeonPrepareScene :: World -> Input -> World
-handleDungeonPrepareScene world@World{dungeonPrep = d_prep, dungeonsPage = d_page} inp = nw
+handleDungeonPrepareScene world@World{dungeonPrep = d_prep} inp = nw
   where
     newPrep = addOrRemoveHero d_prep
     nw = case inp of
@@ -86,15 +86,26 @@ handleDungeonPrepareScene world@World{dungeonPrep = d_prep, dungeonsPage = d_pag
       KeyUp -> world{dungeonPrep = moveUpDownselection d_prep KeyUp}
       KeyDown -> world{dungeonPrep = moveUpDownselection d_prep KeyDown}
       CharKey 's' -> if ((length $ team d_prep) > 0)
-           then world{currentScene = Dungeons
-                     , heros = removeAllEqualElms (heros world) (team d_prep)
-                     , dungeonsPage = comeBackFromStartMission d_page (team d_prep)}
-           else world
+                     then world{currentScene = Fight,
+                                battlePage = Just $ BP.initialiseBattlePage
+                                             heroList
+                                             enemyList
+                                             (randomGen world)
+                                             20
+                               }
+                     -- then world{currentScene = Dungeons
+                     --           , heros = removeAllEqualElms (heros world) (team d_prep)
+                     --           , dungeonsPage = comeBackFromStartMission d_page (team d_prep)}
+                     else world
+        where enemyList = L.list BattleEnemies
+                          (Vec.fromList $ Core.Dungeon.enemies $ dungeon d_prep)
+                          1
+              heroList = L.list BattleHeros (L.listElements $ team d_prep) 1
       Enter -> world{dungeonPrep = newPrep }
       _ -> world
 
 handleFightResultScene :: World -> Input -> World
-handleFightResultScene world@World{battleResultPage = brp} inp = nw
+handleFightResultScene world inp = nw
   where nw = case inp of
           CharKey 'm' -> world{currentScene = Main}
           CharKey 'd' -> world{currentScene = Dungeons}

@@ -54,18 +54,17 @@ drawDungeonPreparePage w@World{ dungeonPrep = dpp} = drawDungeonPreparePage_ dpp
 
 drawDungeonPreparePage_ :: DungeonPrepPage -> [Widget CursorName]
 drawDungeonPreparePage_ DungeonPrepPage{
-  benchHeros = benchHeros,
-  team = team,
-  mode = mode,
-  dungeon = dungeon
+  benchHeros = benchHs,
+  team = tm,
+  mode = md
   } = [vBox [hBox [teamBox, benchBox], str "Press s to start mission"]]
   where benchBox = B.borderWithLabel (str "Bench heros")
               $ C.hCenter
-              $ L.renderList drawBenchList True benchHeros
+              $ L.renderList drawBenchList True benchHs
         teamBox = B.borderWithLabel (str "Team")
               $ C.hCenter
-              $ L.renderList drawTeamList True team
-        (drawBenchList, drawTeamList) = case mode of
+              $ L.renderList drawTeamList True tm
+        (drawBenchList, drawTeamList) = case md of
           Add -> (drawHero, drawHeroNoSelect)
           Remove -> (drawHeroNoSelect, drawHero)
 

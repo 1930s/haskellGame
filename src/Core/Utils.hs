@@ -2,6 +2,7 @@ module Core.Utils (removeAt,
                    modifyAt,
                    replaceAt,
                    removeAllEqualElms,
+                   listReplaceAt,
                    CursorName(..)
                    ) where
 
@@ -38,3 +39,7 @@ removeAllEqualElms lst rmv = foldr (\i l -> L.listRemove i l) lst idxes
         rmvVec = L.listElements rmv
         idxes = [ getIdxToRmv i | i <- [0..(length rmvVec -1)]]
         getIdxToRmv n = fromJust $ Vec.findIndex (\e -> e == rmvVec Vec.! n) lstVec
+
+listReplaceAt :: Int -> n -> L.List CursorName n -> L.List CursorName n
+listReplaceAt idx e lst = L.listModify (\ _ -> e) $ L.listMoveTo idx lst
+

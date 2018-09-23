@@ -70,9 +70,6 @@ moveUpDownselection dpp@DungeonPrepPage{
           Add -> tm
           Remove -> move tm
 
-
-
-
 defaultPrepPage :: L.List CursorName Hero -> Dungeon -> DungeonPrepPage
 defaultPrepPage heros d = DungeonPrepPage{
   team = L.list DungeonPrepareTeam (Vec.fromList []) 1,

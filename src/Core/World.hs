@@ -12,6 +12,7 @@ import Core.Dungeon
 import Core.DungeonsPage
 import Core.DungeonPrepPage
 import Core.BattleResultPage
+import Core.BattlePage
 
 data Scene = Main
            | HeroInfo
@@ -29,6 +30,7 @@ data World = World {
   dungeonsPage :: DungeonsPage,
   battleResultPage :: BattleResultPage,
   dungeonPrep :: DungeonPrepPage,
+  battlePage :: Maybe BattlePage,
   randomGen :: StdGen
   }
 
@@ -42,6 +44,7 @@ defaultWorld rGen = World {
   dungeonsPage = DungeonsPage $ L.list Normal (Vec.fromList [dungeon1, dungeon2]) 1,
   battleResultPage = BattleResultPage BattleResult{money = 0,
                                                    updatedHero = L.list Normal (Vec.fromList []) 1},
+  battlePage = Nothing,
   randomGen = rGen
   }
   where e1 = defaultEnemy "enemy1"

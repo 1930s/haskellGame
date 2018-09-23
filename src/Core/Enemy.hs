@@ -1,20 +1,19 @@
 module Core.Enemy where
 
-type Name = String
-type HP = Int
-type MaxHP = Int
-type Atk = Int
-type ExpReward = Int
-type MoneyReward = Int
-
 data Enemy = Enemy {
-  name :: Name,
-  maxHP :: MaxHP,
-  hp :: HP,
-  atk :: Atk,
-  expReward :: ExpReward,
-  moneyReward :: MoneyReward
+  name :: String,
+  maxHP :: Int,
+  hp :: Int,
+  atk :: Int,
+  expReward :: Int,
+  moneyReward :: Int
   } deriving (Show, Eq, Ord)
+
+isAlive :: Enemy -> Bool
+isAlive e = hp e > 0
+
+enemyTakeAttack :: Int -> Enemy -> Enemy
+enemyTakeAttack dmg e = e{hp = max 0 (hp e - dmg)}
 
 defaultEnemy :: String -> Enemy
 defaultEnemy n = Enemy {
