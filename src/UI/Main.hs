@@ -1,23 +1,18 @@
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module UI.Main where
 
-import Data.Monoid
-import Input
-import qualified Data.Vector as Vec
+import Data.Maybe
 import qualified Brick.Widgets.Border as B
 import qualified Brick.Widgets.Border.Style as BS
 import qualified Brick.Widgets.List as L
 import qualified Brick.Widgets.Center as C
 import Brick
   ( Widget
-  , hLimit, vLimit, vBox, hBox
-  , padRight, padLeft, padTop, padAll, Padding(..)
+  , vBox, hBox
+  , padTop, padAll, Padding(..)
   , withBorderStyle
   , str
-  , attrMap, withAttr, emptyWidget, AttrName, on, fg
-  , (<+>)
   )
 import Core.World
 import Core.Hero
@@ -26,6 +21,9 @@ import Core.DungeonsPage
 import Core.DungeonPrepPage
 import Core.BattleResultPage
 import Core.Utils
+
+import UI.Common
+import UI.BattlePageUI
 
 drawMain :: World -> [Widget CursorName]
 drawMain w = [vBox [box]]
@@ -112,8 +110,8 @@ drawHero sel h@Hero{name = nm} =
   $ C.hCenter
   $ vBox
   $ fmap str [
-  heartUnicode ++ (show $ hp h),
-  swordUnicode ++ (show $ atk h),
+  [heartUnicode] ++ (show $ hp h),
+  [swordUnicode] ++ (show $ atk h),
   "level: " ++ (show $ level h),
   renderProgressBar expPer expBarMax
   ]
@@ -123,38 +121,13 @@ drawHero sel h@Hero{name = nm} =
       0 -> 0
       n -> (expCap h) `div` n
 
+drawUI :: World -> [Widget CursorName]
+drawUI w@(World{currentScene = scene}) =
+  case scene of Main -> drawMain w
+                HeroInfo -> drawHeroPage w
+                Dungeons -> drawDungeonsPage w
+                DungeonPrepare -> drawDungeonPreparePage w
+                FightResultScene -> drawFightResultScene w
+                Fight -> drawBattlePage $ fromJust $battlePage w
+                -- _ -> [vBox [str $ show scene]]
 
-drawStringListNoSelect :: Bool -> String -> Widget CursorName
-drawStringListNoSelect _ a = drawStringList False a
-
-drawStringList :: Bool -> String -> Widget CursorName
-drawStringList sel a =
-    let selStr s = if sel
-                   then withAttr customAttr (str $ selectUnicode <> " <" <> s <> ">")
-                   else str s
-    in C.hCenter $ selStr $ a
-
-selectUnicode:: String
-selectUnicode = ['\10144']
-
-heartUnicode :: String
-heartUnicode = ['\9829']
-
-swordUnicode :: String
-swordUnicode = ['\9876']
-
-customAttr :: AttrName
-customAttr = L.listSelectedAttr <> "custom"
-
-renderBoxWithName :: String -> Bool -> Widget CursorName -> Widget CursorName
-renderBoxWithName nm True w = withBorderStyle
-  BS.unicodeBold
-  $ B.borderWithLabel (str $ " * " ++ nm )
-  $ w
-renderBoxWithName nm False w = withBorderStyle
-  BS.unicode
-  $ B.borderWithLabel (str $ nm )
-  $ w
-
-renderProgressBar :: Int -> Int -> String
-renderProgressBar p m = (take p $ repeat '#') ++ (take (m - p) $ repeat '-')

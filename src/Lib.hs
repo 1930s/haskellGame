@@ -65,15 +65,6 @@ handleEvent w e =
     Just i -> continue $ handleGameInput w i
     _ -> continue w
 
-drawUI :: World -> [Widget CursorName]
-drawUI w@(World{currentScene = scene}) =
-  case scene of Main -> drawMain w
-                HeroInfo -> drawHeroPage w
-                Dungeons -> drawDungeonsPage w
-                DungeonPrepare -> drawDungeonPreparePage w
-                FightResultScene -> drawFightResultScene w
-                _ -> [vBox [str $ show scene]]
-
 theMap :: AttrMap
 theMap = attrMap V.defAttr []
 
