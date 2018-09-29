@@ -42,4 +42,3 @@ removeAllEqualElms lst rmv = foldr (\i l -> L.listRemove i l) lst idxes
 
 listReplaceAt :: Int -> n -> L.List CursorName n -> L.List CursorName n
 listReplaceAt idx e lst = L.listModify (\ _ -> e) $ L.listMoveTo idx lst
-

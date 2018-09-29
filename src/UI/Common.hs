@@ -2,8 +2,6 @@
 module UI.Common where
 
 import Data.Monoid
-import Input
-import qualified Data.Vector as Vec
 import qualified Brick.Widgets.Border as B
 import qualified Brick.Widgets.Border.Style as BS
 import qualified Brick.Widgets.List as L
@@ -17,12 +15,6 @@ import Brick
   , attrMap, withAttr, emptyWidget, AttrName, on, fg
   , (<+>)
   )
-import Core.World
-import Core.Hero
-import Core.Dungeon
-import Core.DungeonsPage
-import Core.DungeonPrepPage
-import Core.BattleResultPage
 import Core.Utils
 
 drawStringListNoSelect :: Bool -> String -> Widget CursorName
@@ -49,6 +41,9 @@ healthBarUnicode = '\10074'
 
 healthEmptyBarUnicode :: Char
 healthEmptyBarUnicode = '\10072'
+
+skullUnicode :: Char
+skullUnicode = '\9760'
 
 customAttr :: AttrName
 customAttr = L.listSelectedAttr <> "custom"

@@ -24,7 +24,9 @@ data BattleState = HeroTurn
 
 data BattlePage = BattlePage{
   heros :: L.List U.CursorName Hero,
+  deadHeros :: L.List U.CursorName Hero,
   enemies :: L.List U.CursorName Enemy,
+  deadEnemies :: L.List U.CursorName Enemy,
   attackSequence :: [String],
   currentAttacker :: String,
   state :: BattleState,
@@ -41,7 +43,9 @@ initialiseBattlePage :: L.List U.CursorName Hero
                      -> BattlePage
 initialiseBattlePage hs es gen frame = selectHero curAttacker $ BattlePage{
   heros = hs,
+  deadHeros = emptyList,
   enemies = es,
+  deadEnemies = emptyList,
   attackSequence = atkSeq,
   currentAttacker = curAttacker,
   state = HeroTurn,
@@ -50,6 +54,7 @@ initialiseBattlePage hs es gen frame = selectHero curAttacker $ BattlePage{
   countDown = 0,
   randomGen = gen}
   where curAttacker = head atkSeq
+        emptyList = L.list U.Normal (Vec.fromList []) 1
         atkSeq = Vec.toList
                  $ (fmap (\h -> Core.Hero.name h) $ L.listElements hs)
                  Vec.++
@@ -62,15 +67,13 @@ enemyAttackRandomHero bp@BattlePage{
   state = EnemyAttacking,
   heros = hs,
   randomGen = generator,
-  attackSequence = atkSeq,
   currentAttacker = curAttacker
-  } = moveToNextAttacker bp{heros = updatedHeros
-        , attackSequence = updatedSequence
+  } = moveToNextAttacker $ processFunc bp{heros = updatedHeros
         , randomGen = newGen}
   where updatedHeros = listReplaceAt heroUnderAttackIdx updatedHero hs
-        updatedSequence = case isHeroAlive updatedHero of
-          True -> atkSeq
-          False -> atkSeq \\ [Core.Hero.name heroUnderAttack]
+        processFunc = case isHeroAlive updatedHero of
+          True -> id
+          False -> handleHeroDeath updatedHero
         enemy = getEnemyFromAttackSequence curAttacker bp
         updatedHero = heroTakeAttack (Core.Enemy.atk enemy) heroUnderAttack
         heroUnderAttack = L.listElements hs Vec.! heroUnderAttackIdx
@@ -82,24 +85,51 @@ enemyAttackRandomHero bp@BattlePage{
 performHeroAttack :: Int -> BattlePage -> BattlePage
 performHeroAttack enemyIdx bp@BattlePage{
   heros = hs,
-  enemies = es,
-  totalReward = mny,
-  attackSequence = atkSeq
-  } = bp{ enemies = updatedEnemies
-        , heros = updatedHeros
-        , attackSequence = updatedAttackSeq
-        , totalReward = mny+mnyAwd}
+  enemies = es
+  } = moveToNextAttacker $ processFunc $ bp{ enemies = updatedEnemies
+        , heros = updatedHeros}
   where updatedEnemies = listReplaceAt enemyIdx enemyAfterAttack es
         updatedHeros = L.listModify (\_ -> heroAfterAttack) hs
         (_, attackHero) = fromJust $ L.listSelectedElement hs
         enemyUnderAttack = (L.listElements es) Vec.! enemyIdx
         enemyAfterAttack = enemyTakeAttack (Core.Hero.atk attackHero) enemyUnderAttack
-        heroAfterAttack = heroReceiveExp expAwd attackHero
-        (mnyAwd, expAwd, updatedAttackSeq)  = case (isAlive enemyAfterAttack) of
-          False -> (moneyReward enemyAfterAttack
-                   , expReward enemyAfterAttack
-                   , atkSeq \\ [Core.Enemy.name enemyAfterAttack])
-          _ -> (0, 0, atkSeq)
+        heroAfterAttack = heroReceiveExp expRwd attackHero
+        (processFunc, expRwd) = case (isAlive enemyAfterAttack) of
+          False -> (handleEnemyDeath enemyAfterAttack, expReward enemyAfterAttack)
+          _ -> (id, 0)
+
+handleEnemyDeath :: Enemy -> BattlePage -> BattlePage
+handleEnemyDeath enemy bp@BattlePage{
+  attackSequence = atkSeq,
+  totalReward = totalRwd,
+  deadEnemies = des,
+  enemies = es
+  } = bp{
+  attackSequence = updatedAttackSeq,
+  totalReward = totalRwd + moneyRwd,
+  deadEnemies = L.listInsert 0 enemy des,
+  enemies = L.listRemove deadEnemyIdx es
+  }
+  where updatedAttackSeq = atkSeq \\ [Core.Enemy.name enemy]
+        moneyRwd = moneyReward enemy
+        deadEnemyIdx = fromJust $ Vec.findIndex matchEnemyByName $ L.listElements es
+        matchEnemyByName e = Core.Enemy.name e == Core.Enemy.name enemy
+
+
+handleHeroDeath :: Hero -> BattlePage -> BattlePage
+handleHeroDeath hero bp@BattlePage{
+  heros = hs,
+  deadHeros = dhs,
+  attackSequence = atkSeq
+  } = bp{
+  attackSequence = updatedAttackSeq,
+  heros = L.listRemove deadHeroIdx hs,
+  deadHeros = L.listInsert 0 hero dhs
+  }
+  where updatedAttackSeq = atkSeq \\ [Core.Hero.name hero]
+        deadHeroIdx = fromJust $ Vec.findIndex matchHeroByName $ L.listElements hs
+        matchHeroByName h = Core.Hero.name h == Core.Hero.name hero
+
 
 selectHero :: String -> BattlePage -> BattlePage
 selectHero nm bp = bp{heros = L.listMoveTo idx $ heros bp}
@@ -124,6 +154,13 @@ isEnemyAttackNext bp =
     Just _ -> True
   where res = Vec.findIndex matchFunc $ L.listElements $ enemies bp
         matchFunc e = Core.Enemy.name e == currentAttacker bp
+
+ -- TODO
+isFightOver :: BattlePage -> Bool
+isFightOver bp@BattlePage{
+  heros = hs,
+  enemies = es
+  } = True
 
 moveToNextAttacker :: BattlePage -> BattlePage
 moveToNextAttacker bp = selectToCurrentAttacker $ startCountDownIfEnemyAttacking
@@ -167,7 +204,7 @@ handleConfirmAction :: BattlePage -> BattlePage
 handleConfirmAction bp@BattlePage{
   enemies = es,
   state = HeroTurn
-  } = moveToNextAttacker $ performHeroAttack idx bp
+  } = performHeroAttack idx bp
   where idx = fromJust $ L.listSelected es
 handleConfirmAction bp = bp
 
@@ -184,3 +221,4 @@ handleGameTick bp@BattlePage{
           0 -> enemyAttackRandomHero
           _ -> id
 handleGameTick bp = bp
+
