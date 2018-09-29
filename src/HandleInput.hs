@@ -14,8 +14,7 @@ import Core.DungeonPrepPage(addOrRemoveHero,
 import Core.DungeonsPage
 import Core.Dungeon(DungeonState(..),
                     Dungeon(..),
-                    BattleResult(..),
-                    calcBattle)
+                    BattleResult(..))
 import qualified Core.BattlePage as BP
 import Core.BattleResultPage
 import Core.Utils(removeAllEqualElms)
@@ -30,7 +29,7 @@ handleGameInput w@(World {currentScene=scene}) i =
     DungeonPrepare -> handleDungeonPrepareScene w i
     FightResultScene -> handleFightResultScene w i
     HeroInfo -> handleHeroInfoScene w i
-    Fight -> handleBattleScene w i
+    FightScene -> handleBattleScene w i
 
 handleMainScene :: World -> Input -> World
 handleMainScene world inp = nw
@@ -52,18 +51,18 @@ handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
           KeyDown -> world{dungeonsPage= selectDown d_page}
           Enter -> case state dg of
             NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
-            MissionComplete -> world{currentScene = FightResultScene,
-                                     wealth = wealth world + money battleResult,
-                                     heros = updatedHs,
-                                     dungeonsPage = resetCompletedDungeon d_page,
-                                     battleResultPage = BattleResultPage battleResult }
+            MissionComplete -> world
+            -- MissionComplete -> world{currentScene = FightResultScene,
+            --                          wealth = wealth world + money battleResult,
+            --                          heros = updatedHs,
+            --                          dungeonsPage = resetCompletedDungeon d_page,
+            --                          battleResultPage = BattleResultPage battleResult }
             InProgress -> world
           _ -> world
         (_,dg) = fromJust $ L.listSelectedElement $ dungeons d_page
-        battleResult = calcBattle dg $ randomGen world
-        updatedHs = fmap restoreHealth $ foldr (\h l-> L.listInsert 0 h l) (heros world) herosComeBack
-        herosComeBack = updatedHero battleResult
-        restoreHealth h = h{hp = maxHP h}
+        -- updatedHs = fmap restoreHealth $ foldr (\h l-> L.listInsert 0 h l) (heros world) herosComeBack
+        -- herosComeBack = updatedHero battleResult
+        -- restoreHealth h = h{hp = maxHP h}
         hs = heros world
 
 handleHeroInfoScene :: World -> Input -> World
@@ -86,7 +85,7 @@ handleDungeonPrepareScene world@World{dungeonPrep = d_prep} inp = nw
       KeyUp -> world{dungeonPrep = moveUpDownselection d_prep KeyUp}
       KeyDown -> world{dungeonPrep = moveUpDownselection d_prep KeyDown}
       CharKey 's' -> if ((length $ team d_prep) > 0)
-                     then world{currentScene = Fight,
+                     then world{currentScene = FightScene,
                                 battlePage = Just $ BP.initialiseBattlePage
                                              heroList
                                              enemyList
@@ -114,12 +113,26 @@ handleFightResultScene world inp = nw
 handleBattleScene :: World -> Input -> World
 handleBattleScene w@World{battlePage = Nothing} _ = w
 handleBattleScene w@World{battlePage = Just bp} inp = nw
-  where nw = case inp of
+  where nw = case BP.isFightOver bp of
+          True -> fightOverWorld
+          _ -> fightContinueWorld
+        fightContinueWorld = case inp of
           KeyUp -> w{battlePage = Just $ BP.handleSelectUp bp}
           KeyDown -> w{battlePage = Just $ BP.handleSelectDown bp}
           Enter -> w{battlePage = Just $ BP.handleConfirmAction bp}
           _ -> w
+        fightOverWorld = w{currentScene = FightResultScene,
+                           battleResultPage = BP.generateBattleResult bp}
 
 gameTick :: World -> World
-gameTick w@World{battlePage = bp} = w{battlePage= Just n_bp}
-  where n_bp = BP.handleGameTick $ fromJust bp
+gameTick w@World{
+  currentScene = FightScene,
+  battlePage = Just bp} = nw
+  where n_bp = BP.handleGameTick bp
+        nw = case BP.isFightOver bp of
+          True -> fightOverWorld
+          _ -> w{battlePage= Just n_bp}
+        fightOverWorld = w{currentScene = FightResultScene,
+                           battleResultPage = BP.generateBattleResult bp}
+gameTick w = w
+

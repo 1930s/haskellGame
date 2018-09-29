@@ -4,7 +4,9 @@ module Core.BattlePage(
   handleSelectDown,
   handleSelectUp,
   handleConfirmAction,
-  handleGameTick
+  handleGameTick,
+  isFightOver,
+  generateBattleResult
   ) where
 
 import System.Random
@@ -14,6 +16,8 @@ import qualified Core.Utils as U
 import Core.Hero
 import Core.Enemy
 import Core.Utils
+import Core.BattleResultPage
+import qualified Core.Dungeon as DG
 
 import Data.List
 import Data.Maybe
@@ -155,12 +159,13 @@ isEnemyAttackNext bp =
   where res = Vec.findIndex matchFunc $ L.listElements $ enemies bp
         matchFunc e = Core.Enemy.name e == currentAttacker bp
 
- -- TODO
 isFightOver :: BattlePage -> Bool
-isFightOver bp@BattlePage{
+isFightOver BattlePage{
   heros = hs,
   enemies = es
-  } = True
+  } =
+  0 == (Vec.length $ L.listElements hs) ||
+  0 == (Vec.length $ L.listElements es)
 
 moveToNextAttacker :: BattlePage -> BattlePage
 moveToNextAttacker bp = selectToCurrentAttacker $ startCountDownIfEnemyAttacking
@@ -208,7 +213,6 @@ handleConfirmAction bp@BattlePage{
   where idx = fromJust $ L.listSelected es
 handleConfirmAction bp = bp
 
-
 handleGameTick :: BattlePage -> BattlePage
 handleGameTick bp@BattlePage{
   state = EnemyAttacking,
@@ -222,3 +226,13 @@ handleGameTick bp@BattlePage{
           _ -> id
 handleGameTick bp = bp
 
+generateBattleResult :: BattlePage -> BattleResultPage
+generateBattleResult BattlePage{
+  totalReward = totalRwd,
+  heros = hs,
+  deadHeros = dhs
+  } = BattleResultPage{result = res}
+  where res = DG.BattleResult{
+          DG.money = totalRwd,
+          DG.updatedHero = L.list Normal (L.listElements hs Vec.++ L.listElements dhs ) 1
+          }

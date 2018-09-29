@@ -128,6 +128,6 @@ drawUI w@(World{currentScene = scene}) =
                 Dungeons -> drawDungeonsPage w
                 DungeonPrepare -> drawDungeonPreparePage w
                 FightResultScene -> drawFightResultScene w
-                Fight -> drawBattlePage $ fromJust $battlePage w
+                FightScene -> drawBattlePage $ fromJust $battlePage w
                 -- _ -> [vBox [str $ show scene]]
 

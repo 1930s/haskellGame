@@ -19,7 +19,7 @@ data Scene = Main
            | Dungeons
            | DungeonPrepare
            | FightResultScene
-           | Fight
+           | FightScene
            deriving (Eq, Show, Ord)
 
 data World = World {
