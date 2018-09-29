@@ -51,18 +51,9 @@ handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
           KeyDown -> world{dungeonsPage= selectDown d_page}
           Enter -> case state dg of
             NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
-            MissionComplete -> world
-            -- MissionComplete -> world{currentScene = FightResultScene,
-            --                          wealth = wealth world + money battleResult,
-            --                          heros = updatedHs,
-            --                          dungeonsPage = resetCompletedDungeon d_page,
-            --                          battleResultPage = BattleResultPage battleResult }
-            InProgress -> world
+            _ -> world
           _ -> world
         (_,dg) = fromJust $ L.listSelectedElement $ dungeons d_page
-        -- updatedHs = fmap restoreHealth $ foldr (\h l-> L.listInsert 0 h l) (heros world) herosComeBack
-        -- herosComeBack = updatedHero battleResult
-        -- restoreHealth h = h{hp = maxHP h}
         hs = heros world
 
 handleHeroInfoScene :: World -> Input -> World
@@ -74,7 +65,10 @@ handleHeroInfoScene world inp = nw
           _ -> world
 
 handleDungeonPrepareScene :: World -> Input -> World
-handleDungeonPrepareScene world@World{dungeonPrep = d_prep} inp = nw
+handleDungeonPrepareScene world@World{
+  dungeonPrep = d_prep,
+  heros = hs
+  } inp = nw
   where
     newPrep = addOrRemoveHero d_prep
     nw = case inp of
@@ -86,15 +80,13 @@ handleDungeonPrepareScene world@World{dungeonPrep = d_prep} inp = nw
       KeyDown -> world{dungeonPrep = moveUpDownselection d_prep KeyDown}
       CharKey 's' -> if ((length $ team d_prep) > 0)
                      then world{currentScene = FightScene,
+                                heros = removeAllEqualElms hs $ team d_prep,
                                 battlePage = Just $ BP.initialiseBattlePage
                                              heroList
                                              enemyList
                                              (randomGen world)
                                              20
                                }
-                     -- then world{currentScene = Dungeons
-                     --           , heros = removeAllEqualElms (heros world) (team d_prep)
-                     --           , dungeonsPage = comeBackFromStartMission d_page (team d_prep)}
                      else world
         where enemyList = L.list BattleEnemies
                           (Vec.fromList $ Core.Dungeon.enemies $ dungeon d_prep)
@@ -104,11 +96,17 @@ handleDungeonPrepareScene world@World{dungeonPrep = d_prep} inp = nw
       _ -> world
 
 handleFightResultScene :: World -> Input -> World
-handleFightResultScene world inp = nw
+handleFightResultScene world@World{
+  heros = hs,
+  battleResultPage = BattleResultPage{result = BattleResult{updatedHero = updatedHs}}
+  } inp = nw
   where nw = case inp of
-          CharKey 'm' -> world{currentScene = Main}
-          CharKey 'd' -> world{currentScene = Dungeons}
+          CharKey 'm' -> worldWithHerosBack{currentScene = Main}
+          CharKey 'd' -> worldWithHerosBack{currentScene = Dungeons}
           _ -> world
+        worldWithHerosBack = world{
+          heros = L.list Normal (L.listElements hs Vec.++ L.listElements updatedHs) 1
+          }
 
 handleBattleScene :: World -> Input -> World
 handleBattleScene w@World{battlePage = Nothing} _ = w
@@ -135,4 +133,3 @@ gameTick w@World{
         fightOverWorld = w{currentScene = FightResultScene,
                            battleResultPage = BP.generateBattleResult bp}
 gameTick w = w
-
