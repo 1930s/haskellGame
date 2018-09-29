@@ -24,24 +24,42 @@ drawBattlePage bp@BattlePage{
   heros = hs,
   enemies = es,
   attackSequence = atkSeq,
-  state = stt
-  } = [hBox [teamBox, enemiesBox]]
-  where teamBox = renderBoxWithName "Team" False
+  state = stt,
+  currentAttacker = curAtk,
+  countDown = cd
+  } = [vBox [stateBox, battleBoxes]]
+  where stateBox = vBox $ fmap str [show stt, show atkSeq, show curAtk, "frame: " ++ show cd]
+        battleBoxes = hBox [teamBox, enemiesBox]
+        teamBox = renderBoxWithName "Team" False
                   $ C.hCenter
-                  $ vBox
-                  $ fmap drawBattleHero
-                  $ Vec.toList
-                  $ L.listElements hs
-        enemiesBox = vBox []
+                  $ L.renderList drawBattleHero True hs
+        enemiesBox = renderBoxWithName "Enemies" False
+                  $ C.hCenter
+                  $ L.renderList drawBattleEnemy True es
 
 
-drawBattleHero :: Hero -> Widget CursorName
-drawBattleHero h@Hero{
+drawBattleEnemy :: Bool -> Enemy -> Widget CursorName
+drawBattleEnemy sel e@Enemy{
+  Core.Enemy.name = nm,
+  Core.Enemy.atk = attack,
+  Core.Enemy.maxHP = maxHealth,
+  Core.Enemy.hp = health
+  } = renderBoxWithName nm sel
+      $ C.hCenter
+      $ vBox
+      $ fmap str
+      [
+        [swordUnicode] ++ (show $ attack),
+        renderHealthBar health maxHealth
+      ]
+
+drawBattleHero :: Bool -> Hero -> Widget CursorName
+drawBattleHero sel h@Hero{
   Core.Hero.name = nm,
   Core.Hero.atk = attack,
   Core.Hero.maxHP = maxHealth,
   Core.Hero.hp = health
-  } = renderBoxWithName nm False
+  } = renderBoxWithName nm sel
       $ C.hCenter
       $ vBox
       $ fmap str

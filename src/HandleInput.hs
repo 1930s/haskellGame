@@ -30,7 +30,7 @@ handleGameInput w@(World {currentScene=scene}) i =
     DungeonPrepare -> handleDungeonPrepareScene w i
     FightResultScene -> handleFightResultScene w i
     HeroInfo -> handleHeroInfoScene w i
-    Fight -> w
+    Fight -> handleBattleScene w i
 
 handleMainScene :: World -> Input -> World
 handleMainScene world inp = nw
@@ -111,6 +111,15 @@ handleFightResultScene world inp = nw
           CharKey 'd' -> world{currentScene = Dungeons}
           _ -> world
 
+handleBattleScene :: World -> Input -> World
+handleBattleScene w@World{battlePage = Nothing} _ = w
+handleBattleScene w@World{battlePage = Just bp} inp = nw
+  where nw = case inp of
+          KeyUp -> w{battlePage = Just $ BP.handleSelectUp bp}
+          KeyDown -> w{battlePage = Just $ BP.handleSelectDown bp}
+          Enter -> w{battlePage = Just $ BP.handleConfirmAction bp}
+          _ -> w
+
 gameTick :: World -> World
-gameTick w@World{dungeonsPage = dp} = w{dungeonsPage = n_dp}
-  where n_dp = dungeonsPageTick dp
+gameTick w@World{battlePage = bp} = w{battlePage= Just n_bp}
+  where n_bp = BP.handleGameTick $ fromJust bp
