@@ -4,7 +4,6 @@ import qualified Data.Vector as Vec
 import Data.Maybe
 import Core.Utils(CursorName(..))
 import Core.World
-import Core.Hero(Hero(..))
 import Core.DungeonPrepPage(addOrRemoveHero,
                             defaultPrepPage,
                             addMode,
@@ -111,25 +110,29 @@ handleFightResultScene world@World{
 handleBattleScene :: World -> Input -> World
 handleBattleScene w@World{battlePage = Nothing} _ = w
 handleBattleScene w@World{battlePage = Just bp} inp = nw
-  where nw = case BP.isFightOver bp of
-          True -> fightOverWorld
-          _ -> fightContinueWorld
-        fightContinueWorld = case inp of
+  where nw = case inp of
           KeyUp -> w{battlePage = Just $ BP.handleSelectUp bp}
           KeyDown -> w{battlePage = Just $ BP.handleSelectDown bp}
           Enter -> w{battlePage = Just $ BP.handleConfirmAction bp}
           _ -> w
-        fightOverWorld = w{currentScene = FightResultScene,
-                           battleResultPage = BP.generateBattleResult bp}
+
+handleFightOver :: World -> World
+handleFightOver w@World{
+  battlePage = Just bp,
+  wealth = wel,
+  currentScene = FightScene
+  } = case BP.isFightOver bp of
+        True -> w{currentScene = FightResultScene,
+                  wealth = wel + BP.totalReward bp,
+                  battleResultPage = BP.generateBattleResult bp}
+        _ -> w
+handleFightOver w = w
 
 gameTick :: World -> World
 gameTick w@World{
   currentScene = FightScene,
   battlePage = Just bp} = nw
-  where n_bp = BP.handleGameTick bp
-        nw = case BP.isFightOver bp of
-          True -> fightOverWorld
-          _ -> w{battlePage= Just n_bp}
-        fightOverWorld = w{currentScene = FightResultScene,
-                           battleResultPage = BP.generateBattleResult bp}
+  where nw = handleFightOver w{battlePage= Just n_bp}
+        n_bp = BP.handleGameTick bp
+
 gameTick w = w

@@ -31,8 +31,16 @@ drawMain w = [vBox [box]]
               $ B.borderWithLabel (str "Brightest Dungeon")
               $ C.hCenter
               $ padAll 1
-              $ L.renderList drawStringList True
+              $ vBox [ summary, renderOptions ]
+        renderOptions =
+              L.renderList drawStringList True
               $ options w
+        summary =
+          renderBoxWithName "Summary" False
+          $ C.hCenter
+          $ hBox $ fmap str [
+          "Wealth: " ++ (show $ wealth w)
+          ]
 
 drawHeroPage :: World -> [Widget CursorName]
 drawHeroPage w@World{heros = hs} = [vBox [box]]
