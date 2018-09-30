@@ -59,7 +59,14 @@ renderBoxWithName nm False w = withBorderStyle
   $ w
 
 renderProgressBar :: Int -> Int -> String
-renderProgressBar p m = (take p $ repeat '#') ++ (take (m - p) $ repeat '-')
+renderProgressBar c m = renderBarCommon c m '#' '-'
 
 renderHealthBar :: Int -> Int -> String
-renderHealthBar p m = (take p $ repeat healthBarUnicode) ++ (take (m - p) $ repeat healthEmptyBarUnicode)
+renderHealthBar c m = renderBarCommon c m healthBarUnicode healthEmptyBarUnicode
+
+renderBarCommon :: Int -> Int -> Char -> Char -> String
+renderBarCommon c m ch emptyCh = (take p $ repeat ch) ++ (take (10 - p) $ repeat emptyCh)
+  where p = case c of
+          0 -> 0
+          _ -> (c * 10) `div` m
+

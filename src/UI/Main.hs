@@ -121,13 +121,10 @@ drawHero sel h@Hero{name = nm} =
   [heartUnicode] ++ (show $ hp h),
   [swordUnicode] ++ (show $ atk h),
   "level: " ++ (show $ level h),
-  renderProgressBar expPer expBarMax
+  "exp cap" ++ (show $ expCap h),
+  "exp " ++ (show $ curExp h),
+  renderProgressBar (curExp h) (expCap h)
   ]
-  where
-    expBarMax = 10
-    expPer = case (curExp h) of
-      0 -> 0
-      n -> (expCap h) `div` n
 
 drawUI :: World -> [Widget CursorName]
 drawUI w@(World{currentScene = scene}) =

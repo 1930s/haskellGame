@@ -21,7 +21,7 @@ defaultEnemy n = Enemy {
             maxHP = 5,
             hp = 5,
             atk = 1,
-            expReward = 5,
+            expReward = 10,
             moneyReward = 10
             }
 

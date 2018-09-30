@@ -54,31 +54,7 @@ defaultWorld rGen = World {
         dungeon1 = defaultDungeon "dungeon1" [e1,e2]
         dungeon2 = defaultDungeon "dungeon2" [e3,e4]
         startHeros = [
-          Hero {
-              name = "hero1",
-              maxHP = 10,
-              hp = 10,
-              atk = 2,
-              level = 1,
-              curExp = 0,
-              expCap = 10
-              },
-          Hero {
-              name = "hero2",
-              maxHP = 10,
-              hp = 10,
-              atk = 2,
-              level = 1,
-              curExp = 0,
-              expCap = 10
-              },
-          Hero {
-              name = "hero3",
-              maxHP = 10,
-              hp = 10,
-              atk = 2,
-              level = 1,
-              curExp = 0,
-              expCap = 10
-              }
+          defaultHero "hero 1",
+          defaultHero "hero 2",
+          defaultHero "hero 3"
           ]

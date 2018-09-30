@@ -28,3 +28,14 @@ heroReceiveExp amt h = h{level = lvl, curExp = cExp, expCap = eCap}
 
 instance Eq Hero where
   a == b = name a == name b
+
+defaultHero :: String -> Hero
+defaultHero nm = Hero{
+  name = nm,
+  maxHP = 10,
+  hp = 10,
+  atk = 2,
+  level = 1,
+  curExp = 0,
+  expCap = 10
+  }
