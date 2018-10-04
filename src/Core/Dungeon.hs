@@ -30,8 +30,6 @@ data Dungeon = Dungeon {
   countDown :: Int
   }
 
-instance Eq Dungeon where
-  d == d2 = name (d :: Dungeon ) == name (d2 :: Dungeon )
 
 dungeonTick :: Dungeon -> Dungeon
 dungeonTick d@Dungeon{countDown = 0, state = InProgress} = d{state = MissionComplete}

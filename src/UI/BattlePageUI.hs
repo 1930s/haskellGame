@@ -1,5 +1,6 @@
 module UI.BattlePageUI where
 
+import Control.Lens
 import Core.Hero
 import Core.Enemy
 import Core.BattlePage
@@ -39,26 +40,21 @@ drawBattlePage bp@BattlePage{
 
 
 drawBattleEnemy :: Bool -> Enemy -> Widget CursorName
-drawBattleEnemy sel e@Enemy{
-  Core.Enemy.name = nm,
-  Core.Enemy.atk = attack,
-  Core.Enemy.maxHP = maxHealth,
-  Core.Enemy.hp = health
-  } = renderBoxWithName nm sel
+drawBattleEnemy sel e = renderBoxWithName (e^.eName) sel
       $ C.hCenter
       $ vBox
       $ fmap str
       [
-        [swordUnicode] ++ (show $ attack),
-        renderHealthBar health maxHealth
+        [swordUnicode] ++ (show $ e^.eAtk),
+        renderHealthBar (e^.eHp) (e^.eMaxHP)
       ]
 
 drawBattleHero :: Bool -> Hero -> Widget CursorName
 drawBattleHero sel h@Hero{
-  Core.Hero.name = nm,
-  Core.Hero.atk = attack,
-  Core.Hero.maxHP = maxHealth,
-  Core.Hero.hp = health
+  name = nm,
+  atk = attack,
+  maxHP = maxHealth,
+  hp = health
   } = renderBoxWithName nm sel
       $ C.hCenter
       $ vBox
