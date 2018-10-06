@@ -22,7 +22,7 @@ data DungeonState = NoMission
 -- for MVP assume only one battle
 -- n vs n battle
 data Dungeon = Dungeon {
-  name :: String,
+  dName :: String,
   enemies :: [Enemy],
   missionLength :: Int,
   herosInDungeon :: L.List CursorName Hero,
@@ -43,7 +43,7 @@ startMission hs dg = dg{state = InProgress, countDown = missionLength dg, herosI
 
 defaultDungeon :: String -> [Enemy] -> Dungeon
 defaultDungeon n es = Dungeon {
-  name = n ,
+  dName = n ,
   enemies = es,
   missionLength = 10 * inputRate,
   herosInDungeon = L.list Normal (Vec.fromList []) 1,

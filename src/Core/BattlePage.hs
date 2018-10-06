@@ -61,9 +61,9 @@ initialiseBattlePage hs es gen frame = selectHero curAttacker $ BattlePage{
   where curAttacker = head atkSeq
         emptyList = L.list U.Normal (Vec.fromList []) 1
         atkSeq = Vec.toList
-                 $ (fmap (\h -> name h) $ L.listElements hs)
+                 $ (fmap (\h -> h^.name) $ L.listElements hs)
                  Vec.++
-                 (fmap (\e -> e^.(eName)) $ L.listElements es)
+                 (fmap (\e -> (e^.eName)) $ L.listElements es)
 
 -- enemy in sequence attack a random enemy
 enemyAttackRandomHero :: BattlePage -> BattlePage
@@ -97,7 +97,7 @@ performHeroAttack enemyIdx bp@BattlePage{
         updatedHeros = L.listModify (\_ -> heroAfterAttack) hs
         (_, attackHero) = fromJust $ L.listSelectedElement hs
         enemyUnderAttack = (L.listElements es) Vec.! enemyIdx
-        enemyAfterAttack = enemyTakeAttack (atk attackHero) enemyUnderAttack
+        enemyAfterAttack = enemyTakeAttack (attackHero^.atk) enemyUnderAttack
         heroAfterAttack = heroReceiveExp expRwd attackHero
         (processFunc, expRwd) = case (isAlive enemyAfterAttack) of
           False -> (handleEnemyDeath enemyAfterAttack, enemyAfterAttack^.eExpReward )
@@ -131,14 +131,14 @@ handleHeroDeath hero bp@BattlePage{
   heros = L.listRemove deadHeroIdx hs,
   deadHeros = L.listInsert 0 hero dhs
   }
-  where updatedAttackSeq = atkSeq \\ [name hero]
+  where updatedAttackSeq = atkSeq \\ [hero^.name ]
         deadHeroIdx = fromJust $ Vec.findIndex matchHeroByName $ L.listElements hs
-        matchHeroByName h = name h == name hero
+        matchHeroByName h = hero == h
 
 
 selectHero :: String -> BattlePage -> BattlePage
 selectHero nm bp = bp{heros = L.listMoveTo idx $ heros bp}
-  where idx = fromJust $ Vec.findIndex (\h -> name h == nm)
+  where idx = fromJust $ Vec.findIndex (\h -> h^.name  == nm)
               $ L.listElements $ heros bp
 
 selectEnemy :: String -> BattlePage -> BattlePage

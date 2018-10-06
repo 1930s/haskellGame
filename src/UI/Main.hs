@@ -2,6 +2,7 @@
 
 module UI.Main where
 
+import Control.Lens
 import Data.Maybe
 import qualified Brick.Widgets.Border as B
 import qualified Brick.Widgets.Border.Style as BS
@@ -91,7 +92,7 @@ drawFightResultScene w@World{
 
 drawDungeon :: Bool -> Dungeon -> Widget CursorName
 drawDungeon sel h@Dungeon{
-  name = nm,
+  dName = nm,
   enemies = es,
   missionLength = missonL,
   herosInDungeon = hs,
@@ -113,17 +114,17 @@ drawHeroNoSelect :: Bool -> Hero -> Widget CursorName
 drawHeroNoSelect _ h = drawHero False h
 
 drawHero :: Bool -> Hero -> Widget CursorName
-drawHero sel h@Hero{name = nm} =
-  renderBoxWithName nm sel
+drawHero sel h =
+  renderBoxWithName (h^.name) sel
   $ C.hCenter
   $ vBox
   $ fmap str [
-  [heartUnicode] ++ (show $ hp h),
-  [swordUnicode] ++ (show $ atk h),
-  "level: " ++ (show $ level h),
-  "exp cap" ++ (show $ expCap h),
-  "exp " ++ (show $ curExp h),
-  renderProgressBar (curExp h) (expCap h)
+  [heartUnicode] ++ (show $ h^.hp),
+  [swordUnicode] ++ (show $ h^.atk),
+  "level: " ++ (show $ h^.level),
+  "exp cap" ++ (show $ h^.expCap),
+  "exp " ++ (show $ h^.curExp),
+  renderProgressBar (h^.curExp ) (h^.expCap )
   ]
 
 drawUI :: World -> [Widget CursorName]

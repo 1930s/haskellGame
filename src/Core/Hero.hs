@@ -1,41 +1,47 @@
+{-# LANGUAGE TemplateHaskell#-}
+
 module Core.Hero where
 
+import Control.Lens
+
 data Hero = Hero {
-  name :: String,
-  maxHP :: Int,
-  hp :: Int,
-  atk :: Int,
-  level :: Int,
-  curExp :: Int,
-  expCap :: Int
-  } deriving (Ord)
+  _name :: String,
+  _maxHP :: Int,
+  _hp :: Int,
+  _atk :: Int,
+  _level :: Int,
+  _curExp :: Int,
+  _expCap :: Int
+  }
+
+makeLenses ''Hero
 
 isHeroAlive :: Hero -> Bool
-isHeroAlive h = hp h > 0
+isHeroAlive h = h^.hp > 0
 
 heroTakeAttack :: Int -> Hero -> Hero
-heroTakeAttack dmg h = h{hp = max 0 (hp h - dmg)}
+heroTakeAttack dmg h = set hp (max 0 (h^.hp - dmg)) h
 
 heroRevive :: Hero -> Hero
-heroRevive h = h{hp = maxHP h}
+heroRevive h = set hp (h^.maxHP) h
 
 -- should property test this
 heroReceiveExp :: Int -> Hero -> Hero
-heroReceiveExp amt h = h{level = lvl, curExp = cExp, expCap = eCap}
-  where (lvl, cExp, eCap) = until noLevelUp oneLevelUp (level h, curExp h + amt, expCap h)
+heroReceiveExp amt h = set level lvl $ set curExp cExp $ set expCap eCap h
+  where (lvl, cExp, eCap) = until noLevelUp oneLevelUp (h^.level, h^.curExp  + amt, h^.expCap )
         noLevelUp (_, e, cap) = e < cap
         oneLevelUp (l, e, cap) = (l+1, e-cap, cap*2)
 
 instance Eq Hero where
-  a == b = name a == name b
+  a == b = a^.name == b^.name
 
 defaultHero :: String -> Hero
 defaultHero nm = Hero{
-  name = nm,
-  maxHP = 10,
-  hp = 10,
-  atk = 2,
-  level = 1,
-  curExp = 0,
-  expCap = 10
+  _name = nm,
+  _maxHP = 10,
+  _hp = 10,
+  _atk = 2,
+  _level = 1,
+  _curExp = 0,
+  _expCap = 10
   }
