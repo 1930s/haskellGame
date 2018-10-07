@@ -84,7 +84,7 @@ handleDungeonPrepareScene world@World{
                                              heroList
                                              enemyList
                                              (randomGen world)
-                                             20
+                                             5
                                }
                      else world
         where enemyList = L.list BattleEnemies

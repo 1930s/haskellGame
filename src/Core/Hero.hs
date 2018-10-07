@@ -10,6 +10,7 @@ module Core.Hero(Hero,
                  maxHP,
                  hp,
                  totalAtk,
+                 totalDef,
                  level,
                  curExp,
                  expCap,
@@ -25,6 +26,7 @@ data Hero = Hero {
   _maxHP :: Int,
   _hp :: Int,
   _atk :: Int,
+  _def :: Int,
   _level :: Int,
   _curExp :: Int,
   _expCap :: Int,
@@ -34,20 +36,31 @@ data Hero = Hero {
 makeLenses ''Hero
 
 totalAtk :: Lens' Hero Int
-totalAtk = lens (\h -> _calculateTotalAttack h) (\h _ -> h)
+totalAtk = lens (\h -> _calculateTotalAtk h) (\h _ -> h)
 
-_calculateTotalAttack :: Hero -> Int
-_calculateTotalAttack Hero{
+totalDef :: Lens' Hero Int
+totalDef = lens (\h -> _calculateTotalDef h) (\h _ -> h)
+
+_calculateTotalAtk :: Hero -> Int
+_calculateTotalAtk Hero{
   _atk = baseAtk,
   _equipments = equips
   } = baseAtk + (sum $ fmap equipValue equips)
   where offenceEquips = filter (\e -> equipType e == Offence) equips
 
+_calculateTotalDef :: Hero -> Int
+_calculateTotalDef Hero{
+  _def = baseDef,
+  _equipments = equips
+  } = baseDef + (sum $ fmap equipValue equips)
+  where offenceEquips = filter (\e -> equipType e == Defence) equips
+
 isHeroAlive :: Hero -> Bool
 isHeroAlive h = h^.hp > 0
 
 heroTakeAttack :: Int -> Hero -> Hero
-heroTakeAttack dmg h = set hp (max 0 (h^.hp - dmg)) h
+heroTakeAttack dmg h = set hp (max 0 (h^.hp - realDmg)) h
+  where realDmg = max 0 (dmg - h^.totalDef)
 
 heroRevive :: Hero -> Hero
 heroRevive h = set hp (h^.maxHP) h
@@ -68,6 +81,7 @@ defaultHero nm = Hero{
   _maxHP = 10,
   _hp = 10,
   _atk = 2,
+  _def = 1,
   _level = 1,
   _curExp = 0,
   _expCap = 10,

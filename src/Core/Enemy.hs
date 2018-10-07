@@ -26,7 +26,7 @@ defaultEnemy n = Enemy {
             _eName = n,
             _eMaxHP = 5,
             _eHp = 5,
-            _eAtk = 1,
+            _eAtk = 2,
             _eExpReward = 10,
             _eMoneyReward = 10
             }
