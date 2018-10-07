@@ -30,7 +30,6 @@ data Dungeon = Dungeon {
   countDown :: Int
   }
 
-
 dungeonTick :: Dungeon -> Dungeon
 dungeonTick d@Dungeon{countDown = 0, state = InProgress} = d{state = MissionComplete}
 dungeonTick dungeon = case state dungeon of

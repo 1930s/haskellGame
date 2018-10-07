@@ -50,16 +50,12 @@ drawBattleEnemy sel e = renderBoxWithName (e^.eName) sel
       ]
 
 drawBattleHero :: Bool -> Hero -> Widget CursorName
-drawBattleHero sel Hero{
-  _name = nm,
-  _atk = attack,
-  _maxHP = maxHealth,
-  _hp = health
-  } = renderBoxWithName nm sel
-      $ C.hCenter
-      $ vBox
-      $ fmap str
-      [
-        [swordUnicode] ++ (show $ attack),
-        renderHealthBar health maxHealth
-      ]
+drawBattleHero sel hero =
+  renderBoxWithName (hero^.name) sel
+  $ C.hCenter
+  $ vBox
+  $ fmap str
+  [
+    [swordUnicode] ++ (show $ (hero^.totalAtk)),
+    renderHealthBar (hero^.hp) (hero^.maxHP)
+  ]

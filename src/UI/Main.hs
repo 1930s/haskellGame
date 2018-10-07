@@ -120,7 +120,7 @@ drawHero sel h =
   $ vBox
   $ fmap str [
   [heartUnicode] ++ (show $ h^.hp),
-  [swordUnicode] ++ (show $ h^.atk),
+  [swordUnicode] ++ (show $ h^.totalAtk),
   "level: " ++ (show $ h^.level),
   "exp cap" ++ (show $ h^.expCap),
   "exp " ++ (show $ h^.curExp),

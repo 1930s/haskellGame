@@ -97,7 +97,7 @@ performHeroAttack enemyIdx bp@BattlePage{
         updatedHeros = L.listModify (\_ -> heroAfterAttack) hs
         (_, attackHero) = fromJust $ L.listSelectedElement hs
         enemyUnderAttack = (L.listElements es) Vec.! enemyIdx
-        enemyAfterAttack = enemyTakeAttack (attackHero^.atk) enemyUnderAttack
+        enemyAfterAttack = enemyTakeAttack (attackHero^.totalAtk) enemyUnderAttack
         heroAfterAttack = heroReceiveExp expRwd attackHero
         (processFunc, expRwd) = case (isAlive enemyAfterAttack) of
           False -> (handleEnemyDeath enemyAfterAttack, enemyAfterAttack^.eExpReward )

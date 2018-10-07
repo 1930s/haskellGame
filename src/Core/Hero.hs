@@ -1,8 +1,24 @@
 {-# LANGUAGE TemplateHaskell#-}
 
-module Core.Hero where
+module Core.Hero(Hero,
+                 isHeroAlive,
+                 heroTakeAttack,
+                 heroRevive,
+                 heroReceiveExp,
+                 defaultHero,
+                 name,
+                 maxHP,
+                 hp,
+                 totalAtk,
+                 level,
+                 curExp,
+                 expCap,
+                 equipments
+                ) where
 
 import Control.Lens
+
+import Core.Equipment
 
 data Hero = Hero {
   _name :: String,
@@ -11,10 +27,21 @@ data Hero = Hero {
   _atk :: Int,
   _level :: Int,
   _curExp :: Int,
-  _expCap :: Int
+  _expCap :: Int,
+  _equipments :: [Equipment]
   }
 
 makeLenses ''Hero
+
+totalAtk :: Lens' Hero Int
+totalAtk = lens (\h -> _calculateTotalAttack h) (\h _ -> h)
+
+_calculateTotalAttack :: Hero -> Int
+_calculateTotalAttack Hero{
+  _atk = baseAtk,
+  _equipments = equips
+  } = baseAtk + (sum $ fmap equipValue equips)
+  where offenceEquips = filter (\e -> equipType e == Offence) equips
 
 isHeroAlive :: Hero -> Bool
 isHeroAlive h = h^.hp > 0
@@ -43,5 +70,6 @@ defaultHero nm = Hero{
   _atk = 2,
   _level = 1,
   _curExp = 0,
-  _expCap = 10
+  _expCap = 10,
+  _equipments = []
   }
