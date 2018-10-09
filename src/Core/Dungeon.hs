@@ -10,10 +10,12 @@ module Core.Dungeon (Dungeon(..)
 import Constants
 import Core.Enemy
 import Core.Hero
+import Core.Equipment
 import Core.Utils(CursorName(Normal))
 
 import qualified Brick.Widgets.List as L
 import qualified Data.Vector as Vec
+import qualified Data.Map as M
 
 data DungeonState = NoMission
                   | InProgress
@@ -27,7 +29,9 @@ data Dungeon = Dungeon {
   missionLength :: Int,
   herosInDungeon :: L.List CursorName Hero,
   state :: DungeonState,
-  countDown :: Int
+  countDown :: Int,
+  -- Drop Rate should be between 0 ~ 100
+  equipDropRate :: M.Map Equipment Int
   }
 
 dungeonTick :: Dungeon -> Dungeon
@@ -47,11 +51,13 @@ defaultDungeon n es = Dungeon {
   missionLength = 10 * inputRate,
   herosInDungeon = L.list Normal (Vec.fromList []) 1,
   state = NoMission,
-  countDown = 0
+  countDown = 0,
+  equipDropRate = M.fromList []
   }
 
 data BattleResult = BattleResult {
   money :: Int,
+  equipmentDrops :: [Equipment],
   updatedHero :: L.List CursorName Hero
   }
 

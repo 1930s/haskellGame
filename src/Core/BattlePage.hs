@@ -17,15 +17,18 @@ import Core.Hero
 import Core.Enemy
 import Core.Utils
 import Core.BattleResultPage
+import Core.Equipment
 import qualified Core.Dungeon as DG
 
 import Data.List
 import Data.Maybe
+import Data.Traversable(mapAccumL)
+import qualified Data.Map as M
 import Control.Lens
 
 data BattleState = HeroTurn
                  | EnemyAttacking
-                 deriving(Show)
+          deriving(Show)
 
 data BattlePage = BattlePage{
   heros :: L.List U.CursorName Hero,
@@ -35,6 +38,7 @@ data BattlePage = BattlePage{
   attackSequence :: [String],
   currentAttacker :: String,
   state :: BattleState,
+  equipDropRate :: M.Map Equipment Int,
   totalReward :: Int,
   attackFrame :: Int,
   countDown :: Int,
@@ -57,6 +61,7 @@ initialiseBattlePage hs es gen frame = selectHero curAttacker $ BattlePage{
   totalReward = 0,
   attackFrame = frame,
   countDown = 0,
+  equipDropRate = M.fromList [],
   randomGen = gen}
   where curAttacker = head atkSeq
         emptyList = L.list U.Normal (Vec.fromList []) 1
@@ -231,9 +236,20 @@ generateBattleResult :: BattlePage -> BattleResultPage
 generateBattleResult BattlePage{
   totalReward = totalRwd,
   heros = hs,
-  deadHeros = dhs
+  deadHeros = dhs,
+  randomGen = rGen,
+  equipDropRate = dropRate
   } = BattleResultPage{result = res}
   where res = DG.BattleResult{
           DG.money = totalRwd,
+          DG.equipmentDrops = map fromJust $ filter isJust dropDecisions,
           DG.updatedHero = L.list Normal (L.listElements hs Vec.++ L.listElements dhs ) 1
           }
+        dropDecisions = snd $ mapAccumL (\gen pair -> decideDrop gen pair) rGen (M.toList dropRate)
+
+decideDrop :: StdGen -> (a, Int) -> (StdGen, Maybe a)
+decideDrop gen (thing, rate) =
+  case ran <= rate of
+    True -> (nGen, Just thing)
+    _ -> (nGen, Nothing)
+  where (ran, nGen) = randomR (0,100) gen
