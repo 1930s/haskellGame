@@ -49,8 +49,9 @@ initialiseBattlePage :: L.List U.CursorName Hero
                      -> L.List U.CursorName Enemy
                      -> StdGen
                      -> Int
+                     -> M.Map Equipment Int
                      -> BattlePage
-initialiseBattlePage hs es gen frame = selectHero curAttacker $ BattlePage{
+initialiseBattlePage hs es gen frame dropRate = selectHero curAttacker $ BattlePage{
   heros = hs,
   deadHeros = emptyList,
   enemies = es,
@@ -61,7 +62,7 @@ initialiseBattlePage hs es gen frame = selectHero curAttacker $ BattlePage{
   totalReward = 0,
   attackFrame = frame,
   countDown = 0,
-  equipDropRate = M.fromList [],
+  equipDropRate = dropRate,
   randomGen = gen}
   where curAttacker = head atkSeq
         emptyList = L.list U.Normal (Vec.fromList []) 1

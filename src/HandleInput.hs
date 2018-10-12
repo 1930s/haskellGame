@@ -85,6 +85,7 @@ handleDungeonPrepareScene world@World{
                                              enemyList
                                              (randomGen world)
                                              5
+                                             (equipDropRate $ dungeon d_prep)
                                }
                      else world
         where enemyList = L.list BattleEnemies

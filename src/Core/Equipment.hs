@@ -10,3 +10,11 @@ data Equipment = Equipment {
   equipPrice :: Int,
   equipValue :: Int
   } deriving (Eq, Ord)
+
+defaultEquipment :: Equipment
+defaultEquipment = Equipment{
+  equipName = "equip",
+  equipType = Offence,
+  equipPrice = 10,
+  equipValue = 1
+  }

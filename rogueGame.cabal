@@ -49,6 +49,7 @@ library
       Core.Hero
       Core.Utils
       Core.World
+      Core.Equipment
       HandleInput
       Input
       Lib
