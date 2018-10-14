@@ -10,7 +10,7 @@ to build : stack build
 - [x] Enemy drop exp, money
 - [x] offence/defence equipment simple effect
 - [x] Dungeon drop Equipment
+- [ ] Inventory page
+- [ ] choose skill
 
 # Temporary TODO:
-- [ ] save dropped equipments in world
-- [ ] redo main page selection ( box )

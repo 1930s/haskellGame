@@ -32,9 +32,9 @@ drawMain w = [vBox [box]]
               $ B.borderWithLabel (str "Brightest Dungeon")
               $ C.hCenter
               $ padAll 1
-              $ vBox [ summary, renderOptions ]
+              $ vBox [summary, padTop (Pad 2) $ vBox [renderOptions]]
         renderOptions =
-              L.renderList drawStringList True
+              L.renderList (\sel n -> renderStringWrappedInBox n sel) True
               $ options w
         summary =
           renderBoxWithName "Summary" False
@@ -44,20 +44,20 @@ drawMain w = [vBox [box]]
           ]
 
 drawHeroPage :: World -> [Widget CursorName]
-drawHeroPage w@World{heros = hs} = [vBox [box]]
+drawHeroPage World{heros = hs} = [vBox [box]]
   where box = B.borderWithLabel (str "Heros")
               $ C.hCenter
               $ L.renderList drawHero True hs
 
 drawDungeonsPage :: World -> [Widget CursorName]
-drawDungeonsPage w@World{ dungeonsPage = dp@DungeonsPage{dungeons = ds}} = [vBox [box]]
+drawDungeonsPage World{ dungeonsPage = DungeonsPage{dungeons = ds}} = [vBox [box]]
   where box = B.borderWithLabel (str "Dungeons")
               $ C.hCenter
               $ L.renderList drawDungeon True
               $ ds
 
 drawDungeonPreparePage :: World -> [Widget CursorName]
-drawDungeonPreparePage w@World{ dungeonPrep = dpp} = drawDungeonPreparePage_ dpp
+drawDungeonPreparePage World{ dungeonPrep = dpp} = drawDungeonPreparePage_ dpp
 
 drawDungeonPreparePage_ :: DungeonPrepPage -> [Widget CursorName]
 drawDungeonPreparePage_ DungeonPrepPage{
@@ -76,7 +76,7 @@ drawDungeonPreparePage_ DungeonPrepPage{
           Remove -> (drawHeroNoSelect, drawHero)
 
 drawFightResultScene :: World -> [Widget CursorName]
-drawFightResultScene w@World{
+drawFightResultScene World{
   battleResultPage = bRP } = [vBox [summaryBox, heroBox]]
   where res = result bRP
         hs = updatedHero res
@@ -91,11 +91,10 @@ drawFightResultScene w@World{
           $ str $ "Money" ++ (show $ money res)
 
 drawDungeon :: Bool -> Dungeon -> Widget CursorName
-drawDungeon sel h@Dungeon{
+drawDungeon sel Dungeon{
   dName = nm,
   enemies = es,
   missionLength = missonL,
-  herosInDungeon = hs,
   state = stt,
   countDown = cd
   } =

@@ -13,6 +13,7 @@ import Core.DungeonsPage
 import Core.DungeonPrepPage
 import Core.BattleResultPage
 import Core.BattlePage
+import Core.Equipment
 
 data Scene = Main
            | HeroInfo
@@ -27,6 +28,7 @@ data World = World {
   currentScene :: Scene ,
   options :: L.List CursorName String,
   heros :: L.List CursorName Hero,
+  inventory :: L.List CursorName Equipment,
   dungeonsPage :: DungeonsPage,
   battleResultPage :: BattleResultPage,
   dungeonPrep :: DungeonPrepPage,
@@ -38,6 +40,7 @@ defaultWorld :: StdGen -> World
 defaultWorld rGen = World {
   wealth = 0,
   options = L.list Normal (Vec.fromList ["Heros", "Dungeons"] ) 1,
+  inventory = L.list Normal (Vec.fromList [] ) 1,
   currentScene = Main,
   dungeonPrep = defaultPrepPage (L.list DungeonPrepareBench (Vec.fromList startHeros) 1) dungeon1 ,
   heros = L.list Normal (Vec.fromList startHeros) 1,

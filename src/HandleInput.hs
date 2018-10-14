@@ -98,13 +98,20 @@ handleDungeonPrepareScene world@World{
 handleFightResultScene :: World -> Input -> World
 handleFightResultScene world@World{
   heros = hs,
-  battleResultPage = BattleResultPage{result = BattleResult{updatedHero = updatedHs}}
+  wealth = wel,
+  inventory = inv,
+  battleResultPage = BattleResultPage{result = BattleResult{
+                                         money = mny,
+                                         equipmentDrops = equips,
+                                         updatedHero = updatedHs}}
   } inp = nw
   where nw = case inp of
           CharKey 'm' -> worldWithHerosBack{currentScene = Main}
           CharKey 'd' -> worldWithHerosBack{currentScene = Dungeons}
           _ -> world
         worldWithHerosBack = world{
+          wealth = wel + mny,
+          inventory = foldr (\l e -> L.listInsert 0 l e) inv equips,
           heros = L.list Normal (L.listElements hs Vec.++ L.listElements updatedHs) 1
           }
 
@@ -120,11 +127,9 @@ handleBattleScene w@World{battlePage = Just bp} inp = nw
 handleFightOver :: World -> World
 handleFightOver w@World{
   battlePage = Just bp,
-  wealth = wel,
   currentScene = FightScene
   } = case BP.isFightOver bp of
         True -> w{currentScene = FightResultScene,
-                  wealth = wel + BP.totalReward bp,
                   battleResultPage = BP.generateBattleResult bp}
         _ -> w
 handleFightOver w = w
