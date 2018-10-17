@@ -16,6 +16,7 @@ import Core.Dungeon(DungeonState(..),
                     BattleResult(..))
 import qualified Core.BattlePage as BP
 import Core.BattleResultPage
+import Core.InventoryPage
 import Core.Utils(removeAllEqualElms)
 import qualified Brick.Widgets.List as L
 import Input
@@ -24,11 +25,12 @@ handleGameInput :: World -> Input -> World
 handleGameInput w@(World {currentScene=scene}) i =
   case scene of
     Main -> handleMainScene w i
-    Dungeons -> handleDungeonScene w i
-    DungeonPrepare -> handleDungeonPrepareScene w i
+    DungeonSelectionScene -> handleDungeonScene w i
+    DungeonPrepareScene -> handleDungeonPrepareScene w i
     FightResultScene -> handleFightResultScene w i
-    HeroInfo -> handleHeroInfoScene w i
+    HeroInfoScene -> handleHeroInfoScene w i
     FightScene -> handleBattleScene w i
+    InventoryScene -> handleInventoryScene w i
 
 handleMainScene :: World -> Input -> World
 handleMainScene world inp = nw
@@ -37,9 +39,10 @@ handleMainScene world inp = nw
           KeyDown -> world{options = L.listMoveDown $ options world}
           Enter -> world{currentScene = nxtScene}
           _ -> world
-        nxtScene = case L.listSelected $ options world of
-          Just 0 -> HeroInfo
-          Just 1 -> Dungeons
+        nxtScene = case L.listSelectedElement $ options world of
+          Just (_, HeroInfoScene) -> HeroInfoScene
+          Just (_, InventoryScene) -> InventoryScene
+          Just (_, DungeonSelectionScene) -> DungeonSelectionScene
           _ -> Main
 
 handleDungeonScene :: World -> Input -> World
@@ -49,7 +52,8 @@ handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
           KeyUp -> world{dungeonsPage= selectUp d_page}
           KeyDown -> world{dungeonsPage= selectDown d_page}
           Enter -> case state dg of
-            NoMission -> world{currentScene = DungeonPrepare, dungeonPrep = defaultPrepPage hs dg}
+            NoMission -> world{currentScene = DungeonPrepareScene
+                              , dungeonPrep = defaultPrepPage hs dg}
             _ -> world
           _ -> world
         (_,dg) = fromJust $ L.listSelectedElement $ dungeons d_page
@@ -71,7 +75,7 @@ handleDungeonPrepareScene world@World{
   where
     newPrep = addOrRemoveHero d_prep
     nw = case inp of
-      CharKey 'd' -> world{currentScene = Dungeons,
+      CharKey 'd' -> world{currentScene = DungeonSelectionScene,
                            dungeonPrep = d_prep{team = L.list Normal (Vec.fromList []) 1}}
       KeyRight -> world{dungeonPrep = addMode d_prep}
       KeyLeft -> world{dungeonPrep = removeMode d_prep}
@@ -107,7 +111,7 @@ handleFightResultScene world@World{
   } inp = nw
   where nw = case inp of
           CharKey 'm' -> worldWithHerosBack{currentScene = Main}
-          CharKey 'd' -> worldWithHerosBack{currentScene = Dungeons}
+          CharKey 'd' -> worldWithHerosBack{currentScene = DungeonSelectionScene}
           _ -> world
         worldWithHerosBack = world{
           wealth = wel + mny,
@@ -122,6 +126,14 @@ handleBattleScene w@World{battlePage = Just bp} inp = nw
           KeyUp -> w{battlePage = Just $ BP.handleSelectUp bp}
           KeyDown -> w{battlePage = Just $ BP.handleSelectDown bp}
           Enter -> w{battlePage = Just $ BP.handleConfirmAction bp}
+          _ -> w
+
+handleInventoryScene :: World -> Input -> World
+handleInventoryScene w@World{ inventoryPage = invs} inp = nw
+  where nw = case inp of
+          KeyUp -> w{inventoryPage = invPageMoveUp invs}
+          KeyDown -> w{inventoryPage = invPageMoveDown invs}
+          CharKey 'm' -> w{currentScene = Main}
           _ -> w
 
 handleFightOver :: World -> World

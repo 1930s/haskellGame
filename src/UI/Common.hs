@@ -58,12 +58,12 @@ renderBoxWithName nm False w = withBorderStyle
   $ B.borderWithLabel (str $ nm )
   $ w
 
-renderStringWrappedInBox :: String -> Bool -> Widget CursorName
-renderStringWrappedInBox s True = withBorderStyle
+renderStringWrappedInBox :: Bool -> String -> Widget CursorName
+renderStringWrappedInBox True s = withBorderStyle
   BS.unicodeBold
   $ B.border
   $ C.hCenter $ vBox [str s]
-renderStringWrappedInBox s False = withBorderStyle
+renderStringWrappedInBox False s = withBorderStyle
   BS.unicode
   $ B.border
   $ C.hCenter $ vBox [str s]

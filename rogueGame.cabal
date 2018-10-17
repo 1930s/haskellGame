@@ -50,6 +50,7 @@ library
       Core.Utils
       Core.World
       Core.Equipment
+      Core.InventoryPage
       HandleInput
       Input
       Lib

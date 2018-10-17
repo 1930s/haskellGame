@@ -11,6 +11,9 @@ to build : stack build
 - [x] offence/defence equipment simple effect
 - [x] Dungeon drop Equipment
 - [ ] Inventory page
-- [ ] choose skill
+
+
+maybe?:
+- [ ] choose skill?
 
 # Temporary TODO:

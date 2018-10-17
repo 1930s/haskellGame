@@ -9,7 +9,7 @@ data Equipment = Equipment {
   equipType :: EquipType,
   equipPrice :: Int,
   equipValue :: Int
-  } deriving (Eq, Ord)
+  } deriving (Eq, Ord, Show)
 
 defaultEquipment :: Equipment
 defaultEquipment = Equipment{

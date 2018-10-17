@@ -14,21 +14,24 @@ import Core.DungeonPrepPage
 import Core.BattleResultPage
 import Core.BattlePage
 import Core.Equipment
+import Core.InventoryPage
 
 data Scene = Main
-           | HeroInfo
-           | Dungeons
-           | DungeonPrepare
+           | HeroInfoScene
+           | DungeonSelectionScene
+           | DungeonPrepareScene
            | FightResultScene
            | FightScene
+           | InventoryScene
            deriving (Eq, Show, Ord)
 
 data World = World {
   wealth :: Int,
   currentScene :: Scene ,
-  options :: L.List CursorName String,
+  options :: L.List CursorName Scene,
   heros :: L.List CursorName Hero,
   inventory :: L.List CursorName Equipment,
+  inventoryPage :: InventoryPage,
   dungeonsPage :: DungeonsPage,
   battleResultPage :: BattleResultPage,
   dungeonPrep :: DungeonPrepPage,
@@ -39,8 +42,9 @@ data World = World {
 defaultWorld :: StdGen -> World
 defaultWorld rGen = World {
   wealth = 0,
-  options = L.list Normal (Vec.fromList ["Heros", "Dungeons"] ) 1,
-  inventory = L.list Normal (Vec.fromList [] ) 1,
+  options = L.list Normal (Vec.fromList [HeroInfoScene, InventoryScene, DungeonSelectionScene] ) 1,
+  inventory = defaultInvs,
+  inventoryPage = InventoryPage{allEquipments = defaultInvs},
   currentScene = Main,
   dungeonPrep = defaultPrepPage (L.list DungeonPrepareBench (Vec.fromList startHeros) 1) dungeon1 ,
   heros = L.list Normal (Vec.fromList startHeros) 1,
@@ -57,6 +61,7 @@ defaultWorld rGen = World {
         e4 = defaultEnemy "enemy4"
         dungeon1 = defaultDungeon "dungeon1" [e1,e2]
         dungeon2 = defaultDungeon "dungeon2" [e3,e4]
+        defaultInvs = L.list Normal (Vec.fromList [] ) 1
         startHeros = [
           defaultHero "hero 1",
           defaultHero "hero 2",

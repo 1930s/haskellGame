@@ -22,6 +22,8 @@ import Core.DungeonsPage
 import Core.DungeonPrepPage
 import Core.BattleResultPage
 import Core.Utils
+import Core.Equipment
+import Core.InventoryPage(InventoryPage(..))
 
 import UI.Common
 import UI.BattlePageUI
@@ -34,8 +36,8 @@ drawMain w = [vBox [box]]
               $ padAll 1
               $ vBox [summary, padTop (Pad 2) $ vBox [renderOptions]]
         renderOptions =
-              L.renderList (\sel n -> renderStringWrappedInBox n sel) True
-              $ options w
+              L.renderList renderStringWrappedInBox True
+              $ fmap show $ options w
         summary =
           renderBoxWithName "Summary" False
           $ C.hCenter
@@ -90,6 +92,20 @@ drawFightResultScene World{
           $ C.hCenter
           $ str $ "Money" ++ (show $ money res)
 
+drawInventoryPage :: World -> [Widget CursorName]
+drawInventoryPage World {
+  inventoryPage = InventoryPage{allEquipments = invs}
+  } = [vBox [box]]
+  where box = B.borderWithLabel (str "All Inventories")
+              $ C.hCenter
+              $ L.renderList drawEquipment True invs
+
+drawEquipment :: Bool -> Equipment -> Widget CursorName
+drawEquipment sel Equipment{
+  equipName = eName
+  } = renderBoxWithName eName sel
+      $ C.hCenter $ vBox []
+
 drawDungeon :: Bool -> Dungeon -> Widget CursorName
 drawDungeon sel Dungeon{
   dName = nm,
@@ -126,13 +142,15 @@ drawHero sel h =
   renderProgressBar (h^.curExp ) (h^.expCap )
   ]
 
+
 drawUI :: World -> [Widget CursorName]
 drawUI w@(World{currentScene = scene}) =
   case scene of Main -> drawMain w
-                HeroInfo -> drawHeroPage w
-                Dungeons -> drawDungeonsPage w
-                DungeonPrepare -> drawDungeonPreparePage w
+                HeroInfoScene -> drawHeroPage w
+                DungeonSelectionScene -> drawDungeonsPage w
+                DungeonPrepareScene -> drawDungeonPreparePage w
                 FightResultScene -> drawFightResultScene w
-                FightScene -> drawBattlePage $ fromJust $battlePage w
+                FightScene -> drawBattlePage $ fromJust $ battlePage w
+                InventoryScene -> drawInventoryPage w
                 -- _ -> [vBox [str $ show scene]]
 
