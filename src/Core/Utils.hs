@@ -15,6 +15,7 @@ data CursorName = Normal
                 | DungeonPrepareBench
                 | BattleHeros
                 | BattleEnemies
+                | BattleResultEquipment
                 deriving(Eq, Ord, Show)
 
 isIndexValid :: [a] -> Int -> Bool

@@ -11,9 +11,9 @@ data Equipment = Equipment {
   equipValue :: Int
   } deriving (Eq, Ord, Show)
 
-defaultEquipment :: Equipment
-defaultEquipment = Equipment{
-  equipName = "equip",
+defaultEquipment :: String ->  Equipment
+defaultEquipment name = Equipment{
+  equipName = name,
   equipType = Offence,
   equipPrice = 10,
   equipValue = 1

@@ -6,6 +6,7 @@ module Core.BattlePage(
   handleConfirmAction,
   handleGameTick,
   isFightOver,
+  decideDrop,
   generateBattleResult
   ) where
 
@@ -243,9 +244,10 @@ generateBattleResult BattlePage{
   } = BattleResultPage{result = res}
   where res = DG.BattleResult{
           DG.money = totalRwd,
-          DG.equipmentDrops = map fromJust $ filter isJust dropDecisions,
+          DG.equipmentDrops = L.list BattleResultEquipment (Vec.fromList equipList) 1,
           DG.updatedHero = L.list Normal (L.listElements hs Vec.++ L.listElements dhs ) 1
           }
+        equipList = map fromJust $ filter isJust dropDecisions
         dropDecisions = snd $ mapAccumL (\gen pair -> decideDrop gen pair) rGen (M.toList dropRate)
 
 decideDrop :: StdGen -> (a, Int) -> (StdGen, Maybe a)

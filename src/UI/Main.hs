@@ -11,7 +11,7 @@ import qualified Brick.Widgets.Center as C
 import Brick
   ( Widget
   , vBox, hBox
-  , padTop, padAll, Padding(..)
+  , padBottom, padTop, padAll, Padding(..)
   , withBorderStyle
   , str
   )
@@ -79,18 +79,23 @@ drawDungeonPreparePage_ DungeonPrepPage{
 
 drawFightResultScene :: World -> [Widget CursorName]
 drawFightResultScene World{
-  battleResultPage = bRP } = [vBox [summaryBox, heroBox]]
+  battleResultPage = bRP } = [vBox [summaryBox ,hBox[heroBox, inventoryBox]]]
   where res = result bRP
         hs = updatedHero res
         heroBox =
-          padTop (Pad 3)
-          $ B.borderWithLabel (str "Updated heros")
+          B.borderWithLabel (str "Updated heros")
           $ C.hCenter
           $ L.renderList drawHeroNoSelect True hs
         summaryBox =
-          B.borderWithLabel (str "Summary")
+          padBottom (Pad 1)
+          $ B.borderWithLabel (str "Summary")
           $ C.hCenter
-          $ str $ "Money" ++ (show $ money res)
+          $ str
+          $ "Money" ++ (show $ money res)
+          ++ " equipments: " ++ (show $ length $ equipmentDrops res)
+        inventoryBox = vBox [B.borderWithLabel (str "All Inventories")
+          $ C.hCenter
+          $ L.renderList (\_ -> drawEquipment False) True $ equipmentDrops res]
 
 drawInventoryPage :: World -> [Widget CursorName]
 drawInventoryPage World {
@@ -103,8 +108,7 @@ drawInventoryPage World {
 drawEquipment :: Bool -> Equipment -> Widget CursorName
 drawEquipment sel Equipment{
   equipName = eName
-  } = renderBoxWithName eName sel
-      $ C.hCenter $ vBox []
+  } = renderStringWrappedInBox sel eName
 
 drawDungeon :: Bool -> Dungeon -> Widget CursorName
 drawDungeon sel Dungeon{

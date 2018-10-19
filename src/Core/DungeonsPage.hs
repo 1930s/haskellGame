@@ -3,7 +3,6 @@ module Core.DungeonsPage where
 import Core.Hero
 import Core.Dungeon
 import Core.Utils
-import Data.Maybe
 import qualified Brick.Widgets.List as L
 
 data DungeonsPage = DungeonsPage {

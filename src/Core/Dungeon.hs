@@ -52,12 +52,12 @@ defaultDungeon n es = Dungeon {
   herosInDungeon = L.list Normal (Vec.fromList []) 1,
   state = NoMission,
   countDown = 0,
-  equipDropRate = M.fromList [(defaultEquipment, 30),(defaultEquipment, 30)]
+  equipDropRate = M.fromList [(defaultEquipment "e1", 30),(defaultEquipment "e2", 80)]
   }
 
 data BattleResult = BattleResult {
   money :: Int,
-  equipmentDrops :: [Equipment],
+  equipmentDrops :: L.List CursorName Equipment,
   updatedHero :: L.List CursorName Hero
   }
 

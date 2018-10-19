@@ -50,7 +50,7 @@ defaultWorld rGen = World {
   heros = L.list Normal (Vec.fromList startHeros) 1,
   dungeonsPage = DungeonsPage $ L.list Normal (Vec.fromList [dungeon1, dungeon2]) 1,
   battleResultPage = BattleResultPage BattleResult{money = 0,
-                                                   equipmentDrops = [],
+                                                   equipmentDrops = defaultInvs,
                                                    updatedHero = L.list Normal (Vec.fromList []) 1},
   battlePage = Nothing,
   randomGen = rGen
