@@ -79,7 +79,7 @@ drawDungeonPreparePage_ DungeonPrepPage{
 
 drawFightResultScene :: World -> [Widget CursorName]
 drawFightResultScene World{
-  battleResultPage = bRP } = [vBox [summaryBox ,hBox[heroBox, inventoryBox]]]
+  battleResultPage = bRP } = [vBox [summaryBox, hBox[heroBox, inventoryBox]]]
   where res = result bRP
         hs = updatedHero res
         heroBox =

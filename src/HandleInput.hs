@@ -33,17 +33,18 @@ handleGameInput w@(World {currentScene=scene}) i =
     InventoryScene -> handleInventoryScene w i
 
 handleMainScene :: World -> Input -> World
-handleMainScene world inp = nw
+handleMainScene world@World{inventory = allInvs} inp = nw
   where nw = case inp of
           KeyUp -> world{options = L.listMoveUp $ options world}
           KeyDown -> world{options = L.listMoveDown $ options world}
-          Enter -> world{currentScene = nxtScene}
+          Enter -> pageUpdated{currentScene = nxtScene}
           _ -> world
         nxtScene = case L.listSelectedElement $ options world of
           Just (_, HeroInfoScene) -> HeroInfoScene
           Just (_, InventoryScene) -> InventoryScene
           Just (_, DungeonSelectionScene) -> DungeonSelectionScene
           _ -> Main
+        pageUpdated = world{inventoryPage = InventoryPage{allEquipments = allInvs}}
 
 handleDungeonScene :: World -> Input -> World
 handleDungeonScene world@World{dungeonsPage = d_page} inp = nw
@@ -115,7 +116,7 @@ handleFightResultScene world@World{
           _ -> world
         worldWithHerosBack = world{
           wealth = wel + mny,
-          inventory = foldr (\l e -> L.listInsert 0 l e) inv equips,
+          inventory = foldr (\e l -> L.listInsert 0 e l) inv equips,
           heros = L.list Normal (L.listElements hs Vec.++ L.listElements updatedHs) 1
           }
 
