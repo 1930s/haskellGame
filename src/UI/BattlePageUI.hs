@@ -21,15 +21,17 @@ import qualified Data.Vector as Vec
 
 
 drawBattlePage :: BattlePage -> [Widget CursorName]
-drawBattlePage bp@BattlePage{
+drawBattlePage BattlePage{
   heros = hs,
   enemies = es,
   attackSequence = atkSeq,
   state = stt,
   currentAttacker = curAtk,
-  countDown = cd
+  countDown = cd,
+  randomGen = rGen
   } = [vBox [stateBox, battleBoxes]]
-  where stateBox = vBox $ fmap str [show stt, show atkSeq, show curAtk, "frame: " ++ show cd]
+  where stateBox = vBox $ fmap str [show stt, show atkSeq, show curAtk, "frame: " ++ show cd,
+                                   show rGen]
         battleBoxes = hBox [teamBox, enemiesBox]
         teamBox = renderBoxWithName "Team" False
                   $ C.hCenter

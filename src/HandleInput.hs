@@ -143,6 +143,7 @@ handleFightOver w@World{
   currentScene = FightScene
   } = case BP.isFightOver bp of
         True -> w{currentScene = FightResultScene,
+                  randomGen = BP.randomGen bp,
                   battleResultPage = BP.generateBattleResult bp}
         _ -> w
 handleFightOver w = w

@@ -10,7 +10,7 @@ to build : stack build
 - [x] Enemy drop exp, money
 - [x] offence/defence equipment simple effect
 - [x] Dungeon drop Equipment
-- [ ] Inventory page
+- [x] Inventory page
 
 
 maybe?:
